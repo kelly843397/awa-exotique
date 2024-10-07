@@ -1,6 +1,5 @@
 <?php
 
-
 class ProductManager extends AbstractManager
 {
     public function __construct()
