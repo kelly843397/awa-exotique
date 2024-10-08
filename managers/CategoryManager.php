@@ -2,30 +2,54 @@
 
 class CategoryManager extends AbstractManager
 {
-    public function __construct()
+   // Méthode pour récupérer toutes les catégories
+       public function getAllCategories(): array
     {
-        parent::__construct();
+        try {
+            // Requête SQL pour récupérer toutes les catégories
+            $query = "SELECT * FROM categories";
+
+            // Exécuter la requête
+            $stmt = $this->pdo->query($query);
+
+            // Vérifier si la requête a été exécutée correctement
+            if ($stmt === false) {
+                return [];
+            }
+
+            // Retourner les résultats sous forme de tableau associatif
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Gérer les erreurs SQL
+            return [];
+        }
     }
 
-    // Méthode pour récupérer toutes les catégories
-    public function findAll(): array
+    // Méthode pour récupérer une catégorie par son ID
+    public function getCategoryById(int $id): ?array
     {
-        // Préparer la requête pour récupérer toutes les catégories
-        $query = $this->db->prepare('SELECT * FROM categories');
-        $query->execute();
+        try {
+            // Requête SQL pour récupérer la catégorie par ID
+            $query = "SELECT * FROM categories WHERE id = :id";
 
-        // Récupérer les résultats
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        $categories = [];
+            // Préparer la requête
+            $stmt = $this->pdo->prepare($query);
 
-        // Parcourir chaque ligne et créer un objet Category
-        foreach ($result as $item) {
-            // Créer une instance de Category
-            $category = new Category($item['id'], $item['name']);
-            // Ajouter l'objet Category au tableau
-            $categories[] = $category;
+            // Lier l'ID au paramètre de la requête
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+            // Exécuter la requête
+            $stmt->execute();
+
+            // Récupérer le résultat sous forme de tableau associatif
+            $category = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Retourner la catégorie si elle existe, sinon null
+            return $category ?: null;
+
+        } catch (PDOException $e) {
+            // En cas d'erreur, retourner null
+            return null;
         }
-
-        return $categories;
     }
 }
