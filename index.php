@@ -12,12 +12,11 @@ require_once 'managers/CategoryManager.php';
 // Instancier le CategoryManager
 $categoryManager = new CategoryManager();
 
-// Récupérer la catégorie avec l'ID 1 (par exemple)
-$category = $categoryManager->getCategoryById(1);
+// Supprimer une catégorie (par exemple, avec l'ID 1)
+$categoryDeleted = $categoryManager->deleteCategory(1);
 
-if ($category) {
-    echo "Nom de la catégorie : " . $category['name'];
+if ($categoryDeleted) {
+    echo "Catégorie supprimée avec succès.";
 } else {
-    echo "Catégorie non trouvée.";
-
+    echo "Erreur lors de la suppression de la catégorie.";
 }
