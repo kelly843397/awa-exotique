@@ -176,4 +176,144 @@ class OrderManager extends AbstractManager
             return false;
         }
     }
+
+    // Méthode pour récupérer toutes les commandes d'un utilisateur avec leurs articles associés
+    public function getOrdersByUserId(int $userId): array
+    {
+        try {
+            // Requête SQL pour récupérer toutes les commandes d'un utilisateur spécifique
+            $queryOrders = "SELECT * FROM orders WHERE user_id = :user_id";
+            $stmtOrders = $this->pdo->prepare($queryOrders);
+            $stmtOrders->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            $stmtOrders->execute();
+            $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
+
+            // Si aucune commande n'est trouvée, retourner un tableau vide
+            if (!$orders) {
+                return [];
+            }
+
+            // Parcourir chaque commande pour récupérer ses articles
+            foreach ($orders as &$order) {
+                $queryItems = "SELECT oi.*, p.name, p.price FROM orders_items oi
+                               JOIN products p ON oi.product_id = p.id
+                               WHERE oi.order_id = :order_id";
+                $stmtItems = $this->pdo->prepare($queryItems);
+                $stmtItems->bindValue(':order_id', $order['id'], PDO::PARAM_INT);
+                $stmtItems->execute();
+                $orderItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+                // Ajouter les articles à la commande
+                $order['items'] = $orderItems;
+            }
+
+            return $orders;  // Retourner toutes les commandes de l'utilisateur avec leurs articles
+        } catch (PDOException $e) {
+            echo "Erreur SQL : " . $e->getMessage();
+            return [];
+        }
+    }
+
+    // Méthode pour ajouter un nouvel article à une commande existante
+    public function addOrderItem(int $orderId, int $productId, int $quantity): bool
+    {
+        try {
+            // Vérifier si la commande existe
+            $queryCheckOrder = "SELECT id FROM orders WHERE id = :order_id";
+            $stmtCheckOrder = $this->pdo->prepare($queryCheckOrder);
+            $stmtCheckOrder->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+            $stmtCheckOrder->execute();
+            $orderExists = $stmtCheckOrder->fetch(PDO::FETCH_ASSOC);
+
+            if (!$orderExists) {
+                throw new PDOException("La commande avec l'ID $orderId n'existe pas.");
+            }
+
+            // Vérifier si le produit existe
+            $queryCheckProduct = "SELECT id FROM products WHERE id = :product_id";
+            $stmtCheckProduct = $this->pdo->prepare($queryCheckProduct);
+            $stmtCheckProduct->bindValue(':product_id', $productId, PDO::PARAM_INT);
+            $stmtCheckProduct->execute();
+            $productExists = $stmtCheckProduct->fetch(PDO::FETCH_ASSOC);
+
+            if (!$productExists) {
+                throw new PDOException("Le produit avec l'ID $productId n'existe pas.");
+            }
+
+            // Requête SQL pour ajouter un article dans `orders_items`
+            $query = "INSERT INTO orders_items (order_id, product_id, quantity) 
+                      VALUES (:order_id, :product_id, :quantity)";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+            $stmt->bindValue(':quantity', $quantity, PDO::PARAM_INT);
+
+            // Exécuter la requête
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Erreur SQL : " . $e->getMessage();
+            return false;
+        }
+    }
+
+    // Méthode pour mettre à jour la quantité d'un article dans une commande existante
+    public function updateOrderItem(int $orderId, int $productId, int $quantity): bool
+    {
+        try {
+            // Vérifier si l'article existe dans la commande
+            $queryCheckItem = "SELECT * FROM orders_items WHERE order_id = :order_id AND product_id = :product_id";
+            $stmtCheckItem = $this->pdo->prepare($queryCheckItem);
+            $stmtCheckItem->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+            $stmtCheckItem->bindValue(':product_id', $productId, PDO::PARAM_INT);
+            $stmtCheckItem->execute();
+            $itemExists = $stmtCheckItem->fetch(PDO::FETCH_ASSOC);
+
+            if (!$itemExists) {
+                throw new PDOException("L'article avec le produit ID $productId n'existe pas dans la commande ID $orderId.");
+            }
+
+            // Requête SQL pour mettre à jour la quantité d'un article dans la table `orders_items`
+            $query = "UPDATE orders_items SET quantity = :quantity WHERE order_id = :order_id AND product_id = :product_id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindValue(':quantity', $quantity, PDO::PARAM_INT);
+            $stmt->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+
+            // Exécuter la requête
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Erreur SQL : " . $e->getMessage();
+            return false;
+        }
+    }
+    
+    // Méthode pour supprimer un article spécifique d'une commande
+    public function deleteOrderItem(int $orderId, int $productId): bool
+    {
+        try {
+            // Vérifier si l'article existe dans la commande
+            $queryCheckItem = "SELECT * FROM orders_items WHERE order_id = :order_id AND product_id = :product_id";
+            $stmtCheckItem = $this->pdo->prepare($queryCheckItem);
+            $stmtCheckItem->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+            $stmtCheckItem->bindValue(':product_id', $productId, PDO::PARAM_INT);
+            $stmtCheckItem->execute();
+            $itemExists = $stmtCheckItem->fetch(PDO::FETCH_ASSOC);
+
+            if (!$itemExists) {
+                throw new PDOException("L'article avec le produit ID $productId n'existe pas dans la commande ID $orderId.");
+            }
+
+            // Requête SQL pour supprimer l'article de la table `orders_items`
+            $query = "DELETE FROM orders_items WHERE order_id = :order_id AND product_id = :product_id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+
+            // Exécuter la requête
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Erreur SQL : " . $e->getMessage();
+            return false;
+        }
+    }
 }

@@ -12,11 +12,11 @@ require_once 'managers/CategoryManager.php';
 // Instancier le OrderManager
 $orderManager = new OrderManager();
 
-// Supprimer la commande avec l'ID 1
-$orderDeleted = $orderManager->deleteOrder(1);
+// Supprimer l'article (produit 2) de la commande 1
+$deleted = $orderManager->deleteOrderItem(4, 1);
 
-if ($orderDeleted) {
-    echo "Commande supprimée avec succès.";
+if ($deleted) {
+    echo "Article supprimé de la commande avec succès.";
 } else {
-    echo "Erreur lors de la suppression de la commande.";
+    echo "Erreur lors de la suppression de l'article de la commande.";
 }
