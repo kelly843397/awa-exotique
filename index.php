@@ -9,14 +9,14 @@ $dotenv->load();
 
 require_once 'managers/CategoryManager.php';
 
-// Instancier le CategoryManager
-$categoryManager = new CategoryManager();
+// Instancier le OrderManager
+$orderManager = new OrderManager();
 
-// Supprimer une catégorie (par exemple, avec l'ID 1)
-$categoryDeleted = $categoryManager->deleteCategory(1);
+// Supprimer la commande avec l'ID 1
+$orderDeleted = $orderManager->deleteOrder(1);
 
-if ($categoryDeleted) {
-    echo "Catégorie supprimée avec succès.";
+if ($orderDeleted) {
+    echo "Commande supprimée avec succès.";
 } else {
-    echo "Erreur lors de la suppression de la catégorie.";
+    echo "Erreur lors de la suppression de la commande.";
 }
