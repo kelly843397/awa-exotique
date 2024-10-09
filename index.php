@@ -1,22 +1,30 @@
 <?php
+session_start();  // Démarrer la session pour gérer les tokens CSRF
 
-// charge l'autoload de composer
+// Vérifier si la session est bien démarrée
+if (session_status() === PHP_SESSION_ACTIVE) {
+    echo "La session est bien démarrée.<br>";
+} else {
+    echo "La session n'a pas pu être démarrée.<br>";
+}
+
+// charge l'autoload de composer (chargement automatique des classes et dépendances)
 require "vendor/autoload.php";
 
 // charge le contenu du .env dans $_ENV
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-require_once 'managers/CategoryManager.php';
+// Instancier le CSRFTokenManager
+$csrfManager = new CSRFTokenManager();
 
-// Instancier le OrderManager
-$orderManager = new OrderManager();
+// Générer un token CSRF
+$token = $csrfManager->generateCSRFToken();
 
-// Supprimer l'article (produit 2) de la commande 1
-$deleted = $orderManager->deleteOrderItem(4, 1);
+// Afficher le token pour vérifier visuellement
+echo "Token généré : " . $token . "<br>";
 
-if ($deleted) {
-    echo "Article supprimé de la commande avec succès.";
-} else {
-    echo "Erreur lors de la suppression de l'article de la commande.";
-}
+echo "<pre>";
+print_r($_SESSION);
+echo "</pre>";
+
