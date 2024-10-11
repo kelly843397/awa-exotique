@@ -173,4 +173,127 @@ class UserManager extends AbstractManager
         }
     }
 
+    public function getUserById($id): ?array
+    {
+        // Vérifie que l'ID est un entier
+        if (!is_numeric($id) || intval($id) != $id) {
+            throw new Exception("L'ID doit être un entier valide.");
+        }
+
+        try {
+            // Préparation de la requête SQL
+            $statement = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
+            $statement->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $statement->execute();
+
+            // Récupération de l'utilisateur
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+
+            // Si aucun utilisateur n'est trouvé, retourne un message d'erreur
+            if (!$user) {
+                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+            }
+
+            return $user;
+        } catch (Exception $e) {
+            // Gestion de l'exception
+            echo "Erreur : " . $e->getMessage();
+            return null;
+        }
+    }
+
+    public function changePassword(int $id, string $newPassword): bool
+    {
+        try {
+            // Vérification de l'existence de l'utilisateur avec l'ID donné
+            $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
+            $statement->bindValue(':id', $id, PDO::PARAM_INT);
+            $statement->execute();
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$user) {
+                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+            }
+
+            // Hachage du nouveau mot de passe
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+            // Mise à jour du mot de passe dans la base de données
+            $updateStatement = $this->pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
+            $updateStatement->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
+
+            // Exécute la mise à jour et vérifie si la modification a été effectuée
+            if ($updateStatement->execute()) {
+                return true;
+            } else {
+                throw new Exception("Impossible de mettre à jour le mot de passe.");
+            }
+        } catch (Exception $e) {
+            // Gestion des exceptions
+            echo "Erreur : " . $e->getMessage();
+            return false;
+        }
+    }
+
+    public function activateUser(int $id): bool
+    {
+        try {
+            // Vérification de l'existence de l'utilisateur avec l'ID donné
+            $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
+            $statement->bindValue(':id', $id, PDO::PARAM_INT);
+            $statement->execute();
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$user) {
+                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+            }
+
+            // Mise à jour du statut de l'utilisateur (activation)
+            $updateStatement = $this->pdo->prepare("UPDATE users SET status = :status WHERE id = :id");
+            $updateStatement->bindValue(':status', 1, PDO::PARAM_INT); // 1 = utilisateur actif
+            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
+
+            // Exécute la mise à jour et vérifie si la modification a été effectuée
+            if ($updateStatement->execute()) {
+                return true;
+            } else {
+                throw new Exception("Impossible d'activer l'utilisateur.");
+            }
+        } catch (Exception $e) {
+            // Gestion des exceptions
+            echo "Erreur : " . $e->getMessage();
+            return false;
+        }
+    }
+
+    public function deactivateUser(int $id): bool
+    {
+        try {
+            // Vérification de l'existence de l'utilisateur avec l'ID donné
+            $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
+            $statement->bindValue(':id', $id, PDO::PARAM_INT);
+            $statement->execute();
+            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$user) {
+                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+            }
+
+            // Mise à jour du statut de l'utilisateur (désactivation)
+            $updateStatement = $this->pdo->prepare("UPDATE users SET status = :status WHERE id = :id");
+            $updateStatement->bindValue(':status', 0, PDO::PARAM_INT); // 0 = utilisateur inactif
+            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
+
+            if ($updateStatement->execute()) {
+                return true;
+            } else {
+                throw new Exception("Impossible de désactiver l'utilisateur.");
+            }
+        } catch (Exception $e) {
+            // Gestion des exceptions
+            echo "Erreur : " . $e->getMessage();
+            return false;
+        }
+    }
 }
