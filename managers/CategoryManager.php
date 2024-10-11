@@ -25,7 +25,7 @@ class CategoryManager extends AbstractManager
         }
     }
 
-    // Méthode pour récupérer une catégorie par son ID
+    // Méthode pour récupérer une catégorie par son ID 
     public function getCategoryById(int $id): ?array
     {
         try {
