@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des statuts de commande{% endblock %}
+
+{% block content %}
+    <h1>Liste des statuts de commande</h1>
+
+    {% if statuses is not empty %}
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ID Commande</th>
+                    <th>Statut</th>
+                    <th>Date de mise à jour</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for statusUpdate in statuses %}
+                    <tr>
+                        <td>{{ statusUpdate.id }}</td>
+                        <td>{{ statusUpdate.orderId }}</td>
+                        <td>{{ statusUpdate.status }}</td>
+                        <td>{{ statusUpdate.updatedAt }}</td>
+                        <td>
+                            <a href="{{ path('orderstatus_update', {id: statusUpdate.id}) }}">Modifier</a> |
+                            <a href="{{ path('orderstatus_delete', {id: statusUpdate.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce statut ?');">Supprimer</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucun statut de commande trouvé.</p>
+    {% endif %}
+
+    <p><a href="{{ path('orderstatus_create') }}">Ajouter un nouveau statut</a></p>
+{% endblock %}

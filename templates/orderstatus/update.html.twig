@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un statut de commande{% endblock %}
+
+{% block content %}
+    <h1>Modifier le statut de la commande</h1>
+
+    <form action="{{ path('orderstatus_update', {id: statusUpdate.id}) }}" method="POST">
+        <label for="status">Nouveau statut :</label>
+        <input type="text" id="status" name="status" value="{{ statusUpdate.status }}" required><br><br>
+
+        <button type="submit">Mettre à jour</button>
+    </form>
+
+    <p><a href="{{ path('orderstatus_findAll') }}">Retour à la liste</a></p>
+{% endblock %}
