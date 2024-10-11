@@ -2,15 +2,10 @@
 
 class OrderStatusUpdateManager extends AbstractManager
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     // Méthode pour récupérer toutes les mises à jour de Orderstatus
     public function findAll(): array
     {
-        $query = $this->db->prepare('SELECT * FROM orders_status_updates');
+        $query = $this->pdo->prepare('SELECT * FROM orders_status_updates');
         $query->execute();
 
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -18,10 +13,10 @@ class OrderStatusUpdateManager extends AbstractManager
 
         foreach ($result as $item) {
             $statusUpdate = new OrderStatusUpdate(
-                $item['id'],
-                $item['order_id'],
+                (int) $item['order_id'],  // Conversion en entier
                 $item['status'],
-                $item['updated_at']
+                $item['updated_at'],
+                (int) $item['id']         // Conversion en entier
             );
             $statusUpdates[] = $statusUpdate;
         }
@@ -29,16 +24,68 @@ class OrderStatusUpdateManager extends AbstractManager
         return $statusUpdates;
     }
 
-    // Méthode pour ajouter une nouvelle mise à jour de Orderstatus
-    public function addStatusUpdate(OrderStatusUpdate $statusUpdate): void
+    // Méthode pour créer une nouvelle mise à jour de statut pour une commande
+    public function createOrderStatus(int $orderId, string $status): bool
     {
-        $query = $this->db->prepare('INSERT INTO orders_status_updates (order_id, status, updated_at) VALUES (:orderId, :status, :updatedAt)');
-        $query->bindValue(':orderId', $statusUpdate->getOrderId());
-        $query->bindValue(':status', $statusUpdate->getStatus());
-        $query->bindValue(':updatedAt', $statusUpdate->getUpdatedAt());
-        $query->execute();
+        try {
+            // Requête SQL pour insérer une nouvelle mise à jour de statut
+            $query = 'INSERT INTO orders_status_updates (order_id, status, updated_at) VALUES (:orderId, :status, NOW())';
 
-        // Met à jour l'ID de l'objet après insertion
-        $statusUpdate->setId((int) $this->db->lastInsertId());
+            // Préparation de la requête
+            $stmt = $this->pdo->prepare($query);
+
+            // Liaison des paramètres
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+
+            // Exécuter la requête et retourner true si l'insertion a réussi
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // En cas d'erreur, retourner false
+            return false;
+        }
+    }
+
+
+    // Méthode pour mettre à jour le status d'une commande OrderStatus
+    public function updateOrderStatus(int $orderId, string $status): bool
+    {
+        try {
+            // Requête SQL pour mettre à jour le statut d'une commande par son ID
+            $query = 'UPDATE orders_status_updates SET status = :status, updated_at = NOW() WHERE order_id = :orderId';
+
+            // Préparation de la requête
+            $stmt = $this->pdo->prepare($query);
+
+            // Liaison des paramètres
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+
+            // Exécuter la requête et retourner true si la mise à jour a réussi
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // En cas d'erreur, retourner false
+            return false;
+        }
+    }
+
+    public function deleteOrderStatus(int $orderId): bool
+    {
+        try {
+            // Requête SQL pour supprimer une mise à jour de statut par son ID
+            $query = 'DELETE FROM orders_status_updates WHERE order_id = :orderId';
+
+            // Préparation de la requête
+            $stmt = $this->pdo->prepare($query);
+
+            // Liaison du paramètre
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+
+            // Exécuter la requête et retourner true si la suppression a réussi
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // En cas d'erreur, retourner false
+            return false;
+        }
     }
 }
