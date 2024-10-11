@@ -9,13 +9,13 @@ class OrderItem
     private float $price; // Ajout de la propriété price
 
     // Constructeur
-    public function __construct(?int $id = null, int $orderId, int $productId, int $quantity, float $price)
+    public function __construct(int $orderId, int $productId, int $quantity, float $price, ?int $id = null)
     {
-        $this->id = $id;
         $this->orderId = $orderId;
         $this->productId = $productId;
         $this->quantity = $quantity;
         $this->price = $price; // Initialisation de la propriété price
+        $this->id = $id;
     }
 
     // Getters

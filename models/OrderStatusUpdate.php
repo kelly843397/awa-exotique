@@ -8,12 +8,12 @@ class OrderStatusUpdate
     private string $updatedAt;
 
     // Constructeur
-    public function __construct(?int $id = null, int $orderId, string $status, string $updatedAt)
+    public function __construct(int $orderId, string $status, string $updatedAt, ?int $id = null,)
     {
-        $this->id = $id;
         $this->orderId = $orderId;
         $this->status = $status;
         $this->updatedAt = $updatedAt;
+        $this->id = $id;
     }
 
     // Getters
