@@ -12,6 +12,11 @@ abstract class AbstractController
 
         $twig->addExtension(new \Twig\Extension\DebugExtension());
 
+        // Fonction Twig pour générer des URLs avec SimpleRouter
+        $twig->addFunction(new \Twig\TwigFunction('path', function ($route, $params = []) {
+             return \Pecee\SimpleRouter\SimpleRouter::getUrl($route, $params);
+        }));
+
         $this->twig = $twig;
     }
 
