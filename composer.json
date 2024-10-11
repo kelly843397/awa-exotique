@@ -9,7 +9,8 @@
     },
     "require": {
         "vlucas/phpdotenv": "^5.6",
-        "twig/twig": "^3.10"
+        "twig/twig": "^3.10",
+        "pecee/simple-router": "^5.4"
     },
     "require-dev": {
         "symfony/var-dumper": "^7.1",
