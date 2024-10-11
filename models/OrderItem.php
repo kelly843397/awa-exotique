@@ -6,14 +6,16 @@ class OrderItem
     private int $orderId;
     private int $productId;
     private int $quantity;
+    private float $price; // Ajout de la propriété price
 
     // Constructeur
-    public function __construct(?int $id = null, int $orderId, int $productId, int $quantity)
+    public function __construct(?int $id = null, int $orderId, int $productId, int $quantity, float $price)
     {
         $this->id = $id;
         $this->orderId = $orderId;
         $this->productId = $productId;
         $this->quantity = $quantity;
+        $this->price = $price; // Initialisation de la propriété price
     }
 
     // Getters
@@ -37,6 +39,11 @@ class OrderItem
         return $this->quantity;
     }
 
+    public function getPrice(): float
+    {
+        return $this->price;
+    }
+
     // Setters
     public function setId(int $id): void
     {
@@ -56,5 +63,10 @@ class OrderItem
     public function setQuantity(int $quantity): void
     {
         $this->quantity = $quantity;
+    }
+
+    public function setPrice(float $price): void
+    {
+        $this->price = $price;
     }
 }
