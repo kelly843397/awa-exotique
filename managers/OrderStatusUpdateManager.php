@@ -24,6 +24,27 @@ class OrderStatusUpdateManager extends AbstractManager
         return $statusUpdates;
     }
 
+    // Méthode pour récupérer une  mise à jour de Orderstatus
+    public function find(int $orderId): ?OrderStatusUpdate
+    {
+        $query = $this->pdo->prepare('SELECT * FROM orders_status_updates WHERE order_id = :orderId');
+        $query->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+        $query->execute();
+
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            return new OrderStatusUpdate(
+                $result['order_id'],       // Assure-toi que 'order_id' est bien un entier dans ta base de données
+                $result['status'],
+                $result['updated_at'],
+                isset($result['id']) ? (int) $result['id'] : null  // Conversion explicite de l'ID en entier
+            );
+        }
+
+        return null;
+    }
+
     // Méthode pour créer une nouvelle mise à jour de statut pour une commande
     public function createOrderStatus(int $orderId, string $status): bool
     {
