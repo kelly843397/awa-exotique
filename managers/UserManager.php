@@ -1,4 +1,8 @@
 <?php
+// Déclaration du namespace App\Managers, définissant l'espace de noms pour cette classe afin de mieux organiser et éviter les conflits de nommage avec d'autres classes
+namespace App\Managers;
+// Importation de la classe User depuis le namespace App\Models pour l'utiliser dans ce fichier
+use App\Models\User;
 
 class UserManager extends AbstractManager
 {
@@ -7,7 +11,7 @@ class UserManager extends AbstractManager
     {
         // Validation des données utilisateur
         if (!isset($user['firstName'], $user['email'], $user['password'])) {
-            throw new Exception("Les données utilisateur sont incomplètes.");
+            throw new \PDOException("Les données utilisateur sont incomplètes.");
         }
 
         // Assainissement des données utilisateur avec htmlspecialchars
@@ -17,12 +21,12 @@ class UserManager extends AbstractManager
        
         // Validation du prénom (seulement lettres et tirets)
         if (!preg_match("/^[a-zA-Z'-]+$/", $firstName)) {
-            throw new Exception("Prénom invalide.");
+            throw new \PDOException("Prénom invalide.");
         }
 
         // Validation de l'email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Email invalide.");
+            throw new \PDOException("Email invalide.");
         }
 
         // Vérifier si l'email existe déjà dans la base de données
@@ -32,12 +36,12 @@ class UserManager extends AbstractManager
         $checkEmailStmt->execute();
 
         if ($checkEmailStmt->fetchColumn() > 0) {
-            throw new Exception("Cet email est déjà utilisé.");
+            throw new \PDOException("Cet email est déjà utilisé.");
         }
 
         // Validation et sécurisation du mot de passe
         if (!$this->validatePassword($user['password'])) {
-            throw new Exception("Le mot de passe n'est pas assez fort.");
+            throw new \PDOException("Le mot de passe n'est pas assez fort.");
         }
 
         // Hachage du mot de passe avec bcrypt
@@ -55,13 +59,13 @@ class UserManager extends AbstractManager
         // Exécution de la requête SQL et gestion des erreurs
         try {
             if ($statement->execute() === false) {
-                throw new Exception("Échec de l'insertion de l'utilisateur dans la base de données.");
+                throw new \PDOException("Échec de l'insertion de l'utilisateur dans la base de données.");
             }
             return true; // Succès de la création de l'utilisateur
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // Gestion des erreurs SQL et affichage d'un message d'erreur
             error_log($e->getMessage()); // Enregistrement de l'erreur dans les logs
-            throw new Exception("Une erreur s'est produite lors de la création de l'utilisateur.");
+            throw new \PDOException("Une erreur s'est produite lors de la création de l'utilisateur.");
         }
     }
 
@@ -83,7 +87,7 @@ class UserManager extends AbstractManager
     {
         // Vérification que l'utilisateur a bien un id pour l'identifier
         if (!isset($user['id'], $user['firstName'], $user['email'])) {
-            throw new Exception("Les données utilisateur sont incomplètes.");
+            throw new \PDOException("Les données utilisateur sont incomplètes.");
         }
 
         // Assainissement des données utilisateur
@@ -92,12 +96,12 @@ class UserManager extends AbstractManager
 
         // Validation du prénom (seulement lettres et tirets)
         if (!preg_match("/^[a-zA-Z'-]+$/", $firstName)) {
-            throw new Exception("Prénom invalide.");
+            throw new \PDOException("Prénom invalide.");
         }
 
         // Validation de l'email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Email invalide.");
+            throw new \PDOException("Email invalide.");
         }
 
         // Préparation de la requête SQL pour mettre à jour l'utilisateur
@@ -107,7 +111,7 @@ class UserManager extends AbstractManager
         // Si un mot de passe est fourni, on l'ajoute dans la requête
         if (isset($user['password']) && !empty($user['password'])) {
             if (!$this->validatePassword($user['password'])) {
-                throw new Exception("Le mot de passe n'est pas assez fort.");
+                throw new \PDOException("Le mot de passe n'est pas assez fort.");
             }
 
             // Hachage du mot de passe avec bcrypt
@@ -126,7 +130,7 @@ class UserManager extends AbstractManager
         // Liaison des paramètres obligatoires
         $statement->bindValue(':firstName', $firstName);
         $statement->bindValue(':email', $email);
-        $statement->bindValue(':id', $user['id'], PDO::PARAM_INT);
+        $statement->bindValue(':id', $user['id'], \PDO::PARAM_INT);
 
         // Liaison du mot de passe si fourni
         if (isset($user['password']) && !empty($user['password'])) {
@@ -136,13 +140,13 @@ class UserManager extends AbstractManager
         // Exécution de la requête SQL
         try {
             if ($statement->execute() === false) {
-                throw new Exception("Échec de la mise à jour de l'utilisateur.");
+                throw new \PDOException("Échec de la mise à jour de l'utilisateur.");
             }
             return true; // Succès de la mise à jour
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // Gestion des erreurs SQL et affichage d'un message d'erreur
             error_log($e->getMessage()); // Enregistrement de l'erreur dans les logs
-            throw new Exception("Une erreur s'est produite lors de la mise à jour de l'utilisateur.");
+            throw new \PDOException("Une erreur s'est produite lors de la mise à jour de l'utilisateur.");
         }
     }
 
@@ -150,7 +154,7 @@ class UserManager extends AbstractManager
     {
         // Vérification que l'ID est bien un entier valide
         if ($id <= 0) {
-            throw new Exception("ID utilisateur invalide.");
+            throw new \PDOException("ID utilisateur invalide.");
         }
 
         // Préparation de la requête SQL pour supprimer l'utilisateur
@@ -158,18 +162,18 @@ class UserManager extends AbstractManager
         $statement = $this->pdo->prepare($sql);
 
         // Liaison de l'ID de l'utilisateur
-        $statement->bindValue(':id', $id, PDO::PARAM_INT);
+        $statement->bindValue(':id', $id, \PDO::PARAM_INT);
 
         // Exécution de la requête SQL et gestion des erreurs
         try {
             if ($statement->execute() === false) {
-                throw new Exception("Échec de la suppression de l'utilisateur.");
+                throw new \PDOException("Échec de la suppression de l'utilisateur.");
             }
             return true; // Succès de la suppression
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // Gestion des erreurs SQL et affichage d'un message d'erreur
             error_log($e->getMessage()); // Enregistrement de l'erreur dans les logs
-            throw new Exception("Une erreur s'est produite lors de la suppression de l'utilisateur.");
+            throw new \PDOException("Une erreur s'est produite lors de la suppression de l'utilisateur.");
         }
     }
 
@@ -177,25 +181,25 @@ class UserManager extends AbstractManager
     {
         // Vérifie que l'ID est un entier
         if (!is_numeric($id) || intval($id) != $id) {
-            throw new Exception("L'ID doit être un entier valide.");
+            throw new \PDOException("L'ID doit être un entier valide.");
         }
 
         try {
             // Préparation de la requête SQL
             $statement = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
-            $statement->bindValue(':id', (int)$id, PDO::PARAM_INT);
+            $statement->bindValue(':id', (int)$id, \PDO::PARAM_INT);
             $statement->execute();
 
             // Récupération de l'utilisateur
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            $user = $statement->fetch(\PDO::FETCH_ASSOC);
 
             // Si aucun utilisateur n'est trouvé, retourne un message d'erreur
             if (!$user) {
-                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+                throw new \PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
             }
 
             return $user;
-        } catch (Exception $e) {
+        } catch (\PDOException $e) {
             // Gestion de l'exception
             echo "Erreur : " . $e->getMessage();
             return null;
@@ -207,12 +211,12 @@ class UserManager extends AbstractManager
         try {
             // Vérification de l'existence de l'utilisateur avec l'ID donné
             $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
-            $statement->bindValue(':id', $id, PDO::PARAM_INT);
+            $statement->bindValue(':id', $id, \PDO::PARAM_INT);
             $statement->execute();
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            $user = $statement->fetch(\PDO::FETCH_ASSOC);
             
             if (!$user) {
-                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+                throw new \PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
             }
 
             // Hachage du nouveau mot de passe
@@ -220,16 +224,16 @@ class UserManager extends AbstractManager
 
             // Mise à jour du mot de passe dans la base de données
             $updateStatement = $this->pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
-            $updateStatement->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
-            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
+            $updateStatement->bindValue(':password', $hashedPassword, \PDO::PARAM_STR);
+            $updateStatement->bindValue(':id', $id, \PDO::PARAM_INT);
 
             // Exécute la mise à jour et vérifie si la modification a été effectuée
             if ($updateStatement->execute()) {
                 return true;
             } else {
-                throw new Exception("Impossible de mettre à jour le mot de passe.");
+                throw new \PDOException("Impossible de mettre à jour le mot de passe.");
             }
-        } catch (Exception $e) {
+        } catch (\PDOException $e) {
             // Gestion des exceptions
             echo "Erreur : " . $e->getMessage();
             return false;
@@ -241,26 +245,26 @@ class UserManager extends AbstractManager
         try {
             // Vérification de l'existence de l'utilisateur avec l'ID donné
             $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
-            $statement->bindValue(':id', $id, PDO::PARAM_INT);
+            $statement->bindValue(':id', $id, \PDO::PARAM_INT);
             $statement->execute();
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            $user = $statement->fetch(\PDO::FETCH_ASSOC);
             
             if (!$user) {
-                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+                throw new \PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
             }
 
             // Mise à jour du statut de l'utilisateur (activation)
             $updateStatement = $this->pdo->prepare("UPDATE users SET status = :status WHERE id = :id");
-            $updateStatement->bindValue(':status', 1, PDO::PARAM_INT); // 1 = utilisateur actif
-            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
+            $updateStatement->bindValue(':status', 1, \PDO::PARAM_INT); // 1 = utilisateur actif
+            $updateStatement->bindValue(':id', $id, \PDO::PARAM_INT);
 
             // Exécute la mise à jour et vérifie si la modification a été effectuée
             if ($updateStatement->execute()) {
                 return true;
             } else {
-                throw new Exception("Impossible d'activer l'utilisateur.");
+                throw new \PDOException("Impossible d'activer l'utilisateur.");
             }
-        } catch (Exception $e) {
+        } catch (\PDOException $e) {
             // Gestion des exceptions
             echo "Erreur : " . $e->getMessage();
             return false;
@@ -272,25 +276,25 @@ class UserManager extends AbstractManager
         try {
             // Vérification de l'existence de l'utilisateur avec l'ID donné
             $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
-            $statement->bindValue(':id', $id, PDO::PARAM_INT);
+            $statement->bindValue(':id', $id, \PDO::PARAM_INT);
             $statement->execute();
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
+            $user = $statement->fetch(\PDO::FETCH_ASSOC);
             
             if (!$user) {
-                throw new Exception("Aucun utilisateur trouvé avec l'ID " . $id);
+                throw new \PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
             }
 
             // Mise à jour du statut de l'utilisateur (désactivation)
             $updateStatement = $this->pdo->prepare("UPDATE users SET status = :status WHERE id = :id");
-            $updateStatement->bindValue(':status', 0, PDO::PARAM_INT); // 0 = utilisateur inactif
-            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
+            $updateStatement->bindValue(':status', 0, \PDO::PARAM_INT); // 0 = utilisateur inactif
+            $updateStatement->bindValue(':id', $id, \PDO::PARAM_INT);
 
             if ($updateStatement->execute()) {
                 return true;
             } else {
-                throw new Exception("Impossible de désactiver l'utilisateur.");
+                throw new \PDOException("Impossible de désactiver l'utilisateur.");
             }
-        } catch (Exception $e) {
+        } catch (\PDOException $e) {
             // Gestion des exceptions
             echo "Erreur : " . $e->getMessage();
             return false;
