@@ -1,30 +1,25 @@
 <?php
 
-class OrderStatusController
+namespace App\Controllers;
+
+use App\Managers\OrderStatusUpdateManager; // Assure-toi d'importer correctement le manager
+use App\Controllers\AbstractController;    // Assure-toi d'importer correctement l'AbstractController
+
+class OrderStatusController extends AbstractController
 {
-    private $orderStatusUpdateManager;
-
-    // Constructeur pour instancier le manager
-    public function __construct()
-    {
-        $this->orderStatusUpdateManager = new OrderStatusUpdateManager();
-    }
-
     /**
      * Action pour lister tous les statuts de commande
      */
-    public function index()
+    public function findAll()
     {
-        // Récupération de tous les statuts via le manager
-        $statuses = $this->orderStatusUpdateManager->findAll();
+        // Instanciation du manager directement dans la méthode
+        $orderStatusUpdateManager = new OrderStatusUpdateManager();
 
-        // Vérification si des statuts existent
-        if (!empty($statuses)) {
-            // Inclure une vue pour afficher les statuts (à adapter à ton projet)
-            include 'views/statuses/index.php';
-        } else {
-            echo "Aucun statut trouvé.";
-        }
+        // Récupération de tous les statuts via le manager
+        $statuses = $orderStatusUpdateManager->findAll();
+
+        // Affichage de la vue avec Twig en utilisant $this->render hérité d'AbstractController
+        return $this->render('orderstatus/index.html.twig', ['statuses' => $statuses]);
     }
 
     /**
@@ -32,27 +27,31 @@ class OrderStatusController
      */
     public function create()
     {
-        // Vérifier si les données POST sont soumises (par exemple depuis un formulaire)
+        $orderStatusUpdateManager = new OrderStatusUpdateManager();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $orderId = $_POST['order_id'];
             $status = $_POST['status'];
 
-            // Validation basique des données
-            if (isset($orderId, $status) && !empty($orderId) && !empty($status)) {
+            if (!empty($orderId) && !empty($status)) {
+                echo "Données reçues : Order ID = $orderId, Statut = $status <br>";
+
                 // Appel du manager pour créer le statut
-                if ($this->orderStatusUpdateManager->createOrderStatus($orderId, $status)) {
-                    // Rediriger après création (adapter selon ta logique)
-                    header('Location: index.php?controller=orderstatus&action=index');
+                if ($orderStatusUpdateManager->createOrderStatus($orderId, $status)) {
+                   // Redirection après création
+                   return $this->redirect('/orderstatus');
                 } else {
-                    echo "Erreur lors de la création du statut.";
+                    echo "Erreur lors de l'appel au manager.<br>";
                 }
             } else {
-                echo "Veuillez remplir tous les champs.";
+                echo "Les champs sont vides.<br>";
             }
-        } else {
-            // Inclure une vue pour afficher le formulaire de création
-            include 'views/statuses/create.php';
         }
+
+        // Afficher le formulaire de création avec Twig
+        return $this->render('orderstatus/create.html.twig', [
+            'status' => null
+        ]);
     }
 
     /**
@@ -60,26 +59,44 @@ class OrderStatusController
      */
     public function update($orderId)
     {
-        // Vérifier si les données POST sont soumises pour mettre à jour
+        // Instanciation du manager directement dans la méthode
+        $orderStatusUpdateManager = new OrderStatusUpdateManager();
+
+        // Debug de l'orderId reçu dans l'URL
+        var_dump("Order ID reçu : ", $orderId);
+
+        // Vérifier si les données POST sont soumises pour mise à jour
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $status = $_POST['status'];
 
+            // Debug du statut envoyé via le formulaire
+            var_dump("Statut reçu via POST : ", $status);
+
             // Validation basique des données
-            if (isset($status) && !empty($status)) {
-                // Appel du manager pour mettre à jour le statut
-                if ($this->orderStatusUpdateManager->updateOrderStatus($orderId, $status)) {
-                    // Rediriger après mise à jour (adapter selon ta logique)
-                    header('Location: index.php?controller=orderstatus&action=index');
+            if (!empty($status)) {
+                // Appel du manager pour mise à jour
+                if ($orderStatusUpdateManager->updateOrderStatus($orderId, $status)) {
+                    // Debug : confirmation de la mise à jour réussie
+                    var_dump("Mise à jour réussie pour l'ID : ", $orderId);
+
+                    // Rediriger après mise à jour
+                    return $this->redirect('/orderstatus/update/' . $orderId);
                 } else {
                     echo "Erreur lors de la mise à jour du statut.";
                 }
             } else {
                 echo "Veuillez remplir le champ de statut.";
             }
-        } else {
-            // Inclure une vue pour afficher le formulaire de mise à jour
-            include 'views/statuses/update.php';
         }
+
+        // Récupérer le statut existant pour le formulaire de mise à jour
+        $statusUpdate = $orderStatusUpdateManager->find($orderId);
+
+        // Debug du statut récupéré avant d'afficher la vue
+        var_dump("Statut récupéré pour l'ID : ", $statusUpdate);
+
+        // Afficher la vue de mise à jour avec Twig
+       return $this->render('orderstatus/update.html.twig', ['statusUpdate' => $statusUpdate]);
     }
 
     /**
@@ -87,12 +104,22 @@ class OrderStatusController
      */
     public function delete($orderId)
     {
-        // Appel du manager pour supprimer le statut
-        if ($this->orderStatusUpdateManager->deleteOrderStatus($orderId)) {
-            // Rediriger après suppression (adapter selon ta logique)
-            header('Location: index.php?controller=orderstatus&action=index');
+        // Vérifier si la méthode est POST
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Instanciation du manager directement dans la méthode
+            $orderStatusUpdateManager = new OrderStatusUpdateManager();
+
+            // Appel du manager pour supprimer le statut
+            if ($orderStatusUpdateManager->deleteOrderStatus($orderId)) {
+                // Rediriger après suppression
+                return $this->redirect('/orderstatus');
+            } else {
+                echo "Erreur lors de la suppression du statut.";
+            }
         } else {
-            echo "Erreur lors de la suppression du statut.";
+            // Si la méthode n'est pas POST, afficher un message d'erreur
+            echo "Méthode non autorisée.";
         }
     }
+
 }
