@@ -1,5 +1,9 @@
 <?php
 
+namespace App\Managers;
+
+use App\Models\OrderStatusUpdate;
+
 class OrderStatusUpdateManager extends AbstractManager
 {
     // Méthode pour récupérer toutes les mises à jour de Orderstatus
@@ -8,7 +12,7 @@ class OrderStatusUpdateManager extends AbstractManager
         $query = $this->pdo->prepare('SELECT * FROM orders_status_updates');
         $query->execute();
 
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(\PDO::FETCH_ASSOC);
         $statusUpdates = [];
 
         foreach ($result as $item) {
@@ -28,10 +32,10 @@ class OrderStatusUpdateManager extends AbstractManager
     public function find(int $orderId): ?OrderStatusUpdate
     {
         $query = $this->pdo->prepare('SELECT * FROM orders_status_updates WHERE order_id = :orderId');
-        $query->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+        $query->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
         $query->execute();
 
-        $result = $query->fetch(PDO::FETCH_ASSOC);
+        $result = $query->fetch(\PDO::FETCH_ASSOC);
 
         if ($result) {
             return new OrderStatusUpdate(
@@ -56,40 +60,41 @@ class OrderStatusUpdateManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Liaison des paramètres
-            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
-            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
 
             // Exécuter la requête et retourner true si l'insertion a réussi
             return $stmt->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // En cas d'erreur, retourner false
             return false;
         }
     }
 
 
-    // Méthode pour mettre à jour le status d'une commande OrderStatus
+    // Méthode pour mettre à jour le statut d'une commande OrderStatus
     public function updateOrderStatus(int $orderId, string $status): bool
     {
         try {
-            // Requête SQL pour mettre à jour le statut d'une commande par son ID
+            // Requête SQL pour mettre à jour le statut d'une commande par son order_id
             $query = 'UPDATE orders_status_updates SET status = :status, updated_at = NOW() WHERE order_id = :orderId';
 
             // Préparation de la requête
             $stmt = $this->pdo->prepare($query);
 
             // Liaison des paramètres
-            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
-            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
 
             // Exécuter la requête et retourner true si la mise à jour a réussi
             return $stmt->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // En cas d'erreur, retourner false
             return false;
         }
     }
 
+    // Méthode pour supprimer la mise à jour d'une commande OrderStatus
     public function deleteOrderStatus(int $orderId): bool
     {
         try {
@@ -100,11 +105,11 @@ class OrderStatusUpdateManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Liaison du paramètre
-            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
 
             // Exécuter la requête et retourner true si la suppression a réussi
             return $stmt->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // En cas d'erreur, retourner false
             return false;
         }
