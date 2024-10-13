@@ -1,4 +1,8 @@
 <?php
+// Déclaration du namespace App\Managers, définissant l'espace de noms pour cette classe afin de mieux organiser et éviter les conflits de nommage avec d'autres classes
+namespace App\Managers;
+// Importation de la classe OrderItem depuis le namespace App\Models pour l'utiliser dans ce fichier
+use App\Models\OrderItem;
 
 class OrderItemManager extends AbstractManager
 {
@@ -8,7 +12,7 @@ class OrderItemManager extends AbstractManager
         $query = $this->pdo->prepare('SELECT * FROM orders_items');
         $query->execute();
 
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(\PDO::FETCH_ASSOC);
         $orderItems = [];
 
         foreach ($result as $item) {
@@ -34,10 +38,10 @@ class OrderItemManager extends AbstractManager
                                         VALUES (:orderId, :productId, :quantity, :price)');
 
             // Liaison des valeurs
-            $query->bindValue(':orderId', $orderItem->getOrderId(), PDO::PARAM_INT);
-            $query->bindValue(':productId', $orderItem->getProductId(), PDO::PARAM_INT);
-            $query->bindValue(':quantity', $orderItem->getQuantity(), PDO::PARAM_INT);
-            $query->bindValue(':price', $orderItem->getPrice(), PDO::PARAM_STR);  // Liaison du prix
+            $query->bindValue(':orderId', $orderItem->getOrderId(), \PDO::PARAM_INT);
+            $query->bindValue(':productId', $orderItem->getProductId(), \PDO::PARAM_INT);
+            $query->bindValue(':quantity', $orderItem->getQuantity(), \PDO::PARAM_INT);
+            $query->bindValue(':price', $orderItem->getPrice(), \PDO::PARAM_STR);  // Liaison du prix
 
             // Exécution de la requête et vérification de la réussite
             if ($query->execute()) {
@@ -47,7 +51,7 @@ class OrderItemManager extends AbstractManager
             } else {
                 return false; // Retourne false en cas d'échec
             }
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // En cas d'erreur, retourner false
             return false;
         }
@@ -69,15 +73,15 @@ class OrderItemManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Lier les paramètres à la requête SQL
-            $stmt->bindValue(':orderId', $orderItem->getOrderId(), PDO::PARAM_INT);
-            $stmt->bindValue(':productId', $orderItem->getProductId(), PDO::PARAM_INT);
-            $stmt->bindValue(':quantity', $orderItem->getQuantity(), PDO::PARAM_INT);
-            $stmt->bindValue(':price', $orderItem->getPrice(), PDO::PARAM_STR);
-            $stmt->bindValue(':id', $orderItem->getId(), PDO::PARAM_INT);
+            $stmt->bindValue(':orderId', $orderItem->getOrderId(), \PDO::PARAM_INT);
+            $stmt->bindValue(':productId', $orderItem->getProductId(), \PDO::PARAM_INT);
+            $stmt->bindValue(':quantity', $orderItem->getQuantity(), \PDO::PARAM_INT);
+            $stmt->bindValue(':price', $orderItem->getPrice(), \PDO::PARAM_STR);
+            $stmt->bindValue(':id', $orderItem->getId(), \PDO::PARAM_INT);
 
             // Exécuter la requête et retourner true si cela a fonctionné
             return $stmt->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // En cas d'erreur, retourner false
             return false;
         }
@@ -90,11 +94,11 @@ class OrderItemManager extends AbstractManager
             $query = $this->pdo->prepare('DELETE FROM orders_items WHERE id = :id');
             
             // Lier l'ID de l'article à supprimer
-            $query->bindValue(':id', $id, PDO::PARAM_INT);
+            $query->bindValue(':id', $id, \PDO::PARAM_INT);
             
             // Exécuter la requête et retourner true si la suppression a réussi
             return $query->execute();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // En cas d'erreur, retourner false
             return false;
         }
