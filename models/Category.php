@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models;
+
 class Category
 {
     private ?int $id;
