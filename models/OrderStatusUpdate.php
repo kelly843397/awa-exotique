@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models;
+
 class OrderStatusUpdate
 {
     private ?int $id;
@@ -8,7 +10,7 @@ class OrderStatusUpdate
     private string $updatedAt;
 
     // Constructeur
-    public function __construct(int $orderId, string $status, string $updatedAt, ?int $id = null,)
+    public function __construct(int $orderId, string $status, string $updatedAt, ?int $id = null)
     {
         $this->orderId = $orderId;
         $this->status = $status;
