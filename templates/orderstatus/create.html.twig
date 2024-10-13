@@ -3,17 +3,18 @@
 {% block title %}Ajouter un nouveau statut{% endblock %}
 
 {% block content %}
-    <h1>Ajouter un nouveau statut de commande</h1>
+<h1>Ajouter un nouveau statut de commande</h1>
 
-    <form action="{{ path('orderstatus_create') }}" method="POST">
-        <label for="order_id">ID de la commande :</label>
-        <input type="number" id="order_id" name="order_id" required><br><br>
+<form action="/orderstatus/create" method="POST">
+    <label for="order_id">ID de la commande :</label>
+    <input type="number" id="order_id" name="order_id" required><br><br>
 
-        <label for="status">Statut :</label>
-        <input type="text" id="status" name="status" required><br><br>
+    <label for="status">Statut :</label>
+    <input type="text" id="status" name="status" required><br><br>
 
-        <button type="submit">Ajouter le statut</button>
-    </form>
+    <button type="submit">Ajouter le statut</button>
+</form>
 
-    <p><a href="{{ path('orderstatus_findAll') }}">Retour à la liste</a></p>
+<p><a href="/orderstatus">Retour à la liste des statuts</a></p>
 {% endblock %}
+
