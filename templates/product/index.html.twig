@@ -2,18 +2,18 @@
 
 {% block title %}Liste des produits{% endblock %}
 
-{% block content %}
-    <h2>Liste des produits</h2>
-
+{% block body %}
+    <h1>Liste des produits</h1>
+    
     <ul>
         {% for product in products %}
             <li>
-                <a href="/products/{{ product.id }}">{{ product.name }}</a> - {{ product.price }} €
+                <a href="/products/{{ product.id }}">{{ product.name }}</a> - {{ product.price }}€
             </li>
         {% else %}
-            <li>Aucun produit trouvé</li>
+            <p>Aucun produit trouvé.</p>
         {% endfor %}
     </ul>
-
-    <a href="/products/add">Ajouter un produit</a>
+    
+    <a href="/products/create">Ajouter un nouveau produit</a>
 {% endblock %}
