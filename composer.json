@@ -1,11 +1,5 @@
 {   
     "autoload": {
-        "classmap": [
-            "controllers/",
-            "managers/",
-            "models/",
-            "services/"
-        ],
         "psr-4": {
         "App\\":[
             "managers/",
