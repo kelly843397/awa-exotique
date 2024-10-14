@@ -21,9 +21,10 @@
             <a href="/orderstatus/update/{{ status.orderId }}">Modifier</a>
             
             <!-- Formulaire de suppression -->
-            <form action="/orderstatus/delete/{{ status.id }}" method="POST" style="display:inline;">
-                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce statut ?')">Supprimer</button>
+            <form action="/orderstatus/delete/{{ order.id }}" method="POST" style="display:inline;">
+                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')">Supprimer</button>
             </form>
+
         </td>
     </tr>
     {% else %}
