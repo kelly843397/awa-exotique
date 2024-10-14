@@ -25,5 +25,3 @@ $token = $csrfManager->generateCSRFToken();
 // Charger les routes
 require_once __DIR__ . '/services/Router.php';
 
-// Lancer le routeur
-SimpleRouter::start();
