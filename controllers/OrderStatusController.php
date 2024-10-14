@@ -102,8 +102,11 @@ class OrderStatusController extends AbstractController
     /**
      * Action pour supprimer un statut de commande
      */
-    public function delete($orderId)
+    public function delete($orderId): bool
     {
+        // Débogage pour voir si l'order_id est bien récupéré
+        error_log("Order ID reçu dans la méthode delete : " . $orderId);
+        
         // Vérifier si la méthode est POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Instanciation du manager directement dans la méthode
@@ -111,14 +114,19 @@ class OrderStatusController extends AbstractController
 
             // Appel du manager pour supprimer le statut
             if ($orderStatusUpdateManager->deleteOrderStatus($orderId)) {
+                error_log("Suppression réussie pour l'ID : " . $orderId); // Log la suppression
                 // Rediriger après suppression
-                return $this->redirect('/orderstatus');
+                $this->redirect('/orderstatus');
+                
+                return true; // Retourner true en cas de succès
             } else {
-                echo "Erreur lors de la suppression du statut.";
+                error_log("Erreur lors de la suppression de l'ID : " . $orderId);
+                return false; // Retourner false en cas d'erreur
             }
         } else {
+            error_log("Méthode non autorisée");
             // Si la méthode n'est pas POST, afficher un message d'erreur
-            echo "Méthode non autorisée.";
+            return false; // Retourner false si la méthode n'est pas POST
         }
     }
 
