@@ -1,12 +1,16 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails du produit{% endblock %}
+{% block title %}{{ product.name }}{% endblock %}
 
-{% block content %}
-    <h2>{{ product.name }}</h2>
+{% block body %}
+    <h1>{{ product.name }}</h1>
+    <p>Prix : {{ product.price }}€</p>
+    <p>Catégorie : {{ product.category_id }}</p>
+    <img src="{{ product.picture }}" alt="{{ product.name }}">
 
-    <p>Prix : {{ product.price }} €</p>
-    <p>Description : {{ product.description }}</p>
-
-    <a href="/products">Retour à la liste des produits</a>
+    <a href="/products/{{ product.id }}/edit">Modifier</a> |
+    <form action="/products/{{ product.id }}/delete" method="post" style="display: inline;">
+        <button type="submit">Supprimer</button>
+    </form>
+    <br><a href="/products">Retour à la liste des produits</a>
 {% endblock %}
