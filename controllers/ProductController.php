@@ -7,7 +7,7 @@ use App\Managers\ProductManager;
 class ProductController extends AbstractController
 {
     // Méthode pour afficher tous les produits
-    public function index()
+    public function readAllProducts()
     {
         // Création d'une instance du ProductManager pour récupérer les produits
         $productManager = new ProductManager();
