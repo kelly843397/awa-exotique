@@ -4,27 +4,28 @@ namespace App\Models;
 
 class Order
 {
-    private int $id;
+    private ?int $id;
     private int $userId;
     private string $orderDate;
     private string $status;
 
-    // Constructeur pour initialiser les propriétés
-    public function __construct(int $id, int $userId, string $orderDate, string $status)
+    public function __construct(?int $id, int $userId, string $orderDate, string $status)
     {
-        $this->id = $id;
+        // Initialisation des propriétés de la classe
+        $this->id = $id; 
         $this->userId = $userId;
         $this->orderDate = $orderDate;
         $this->status = $status;
     }
 
-    // Getter et Setter pour l'ID
-    public function getId(): int
+    // Getter pour l'ID 
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): void
+    // Setter pour l'ID 
+    public function setId(?int $id): void
     {
         $this->id = $id;
     }
