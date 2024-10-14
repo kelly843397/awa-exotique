@@ -2,9 +2,11 @@
 
 namespace App\Managers;
 
+use PDO;
+
 abstract class AbstractManager
 {
-    protected \PDO $pdo;
+    protected PDO $pdo;
 
     public function __construct()
     {
@@ -14,7 +16,7 @@ abstract class AbstractManager
                      ";dbname=" . $_ENV['DB_NAME'] .
                      ";charset=utf8"; // Charset par défaut
 
-        $this->pdo = new \PDO(
+        $this->pdo = new PDO(
             $connexion,
             $_ENV['DB_USER'],
             $_ENV['DB_PASSWORD']
