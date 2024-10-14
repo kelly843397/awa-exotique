@@ -3,16 +3,26 @@
 namespace App\Managers;
 // Importation de la classe OrderItem depuis le namespace App\Models pour l'utiliser dans ce fichier
 use App\Models\OrderItem;
+use PDO;
 
 class OrderItemManager extends AbstractManager
 {
+    // Propriété pour indiquer la table de la base de données
+    protected string $table = 'orders_items'; // Nom de la table associée
+
+    /**
+     * Trouver un élément de commande spécifique par ID
+     * @param int $id - L'ID de l'item à récupérer
+     * @return OrderItem|null - Retourne l'objet OrderItem si trouvé, sinon null
+     */
+
     // Méthode pour récupérer tous les éléments de commande
     public function findAll(): array
     {
         $query = $this->pdo->prepare('SELECT * FROM orders_items');
         $query->execute();
 
-        $result = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $orderItems = [];
 
         foreach ($result as $item) {
@@ -29,6 +39,36 @@ class OrderItemManager extends AbstractManager
         return $orderItems;
     }
 
+    public function find(int $id): ?OrderItem
+    {
+        // Préparer la requête SQL pour récupérer un item spécifique par ID
+        $query = 'SELECT * FROM ' . $this->table . ' WHERE id = :id';
+        $stmt = $this->pdo->prepare($query);
+
+        // Lier l'ID avec la requête SQL
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        // Exécuter la requête
+        $stmt->execute();
+
+        // Récupérer une seule ligne de résultat sous forme de tableau associatif
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Si un item est trouvé, créer et retourner un objet OrderItem
+        if ($data) {
+            return new OrderItem(
+                orderId: (int)$data['order_id'],      // L'ID de la commande associée
+                productId: (int)$data['product_id'],  // L'ID du produit
+                quantity: (int)$data['quantity'],     // Quantité du produit commandé
+                price: (float)$data['price'],         // Prix unitaire
+                id: (int)$data['id']                  // L'ID de l'item
+            );
+        }
+
+        // Retourne null si aucun item n'est trouvé
+        return null;
+    }
+
     // Méthode pour ajouter un nouvel élément de commande
     public function addOrderItem(OrderItem $orderItem): bool
     {
@@ -38,10 +78,10 @@ class OrderItemManager extends AbstractManager
                                         VALUES (:orderId, :productId, :quantity, :price)');
 
             // Liaison des valeurs
-            $query->bindValue(':orderId', $orderItem->getOrderId(), \PDO::PARAM_INT);
-            $query->bindValue(':productId', $orderItem->getProductId(), \PDO::PARAM_INT);
-            $query->bindValue(':quantity', $orderItem->getQuantity(), \PDO::PARAM_INT);
-            $query->bindValue(':price', $orderItem->getPrice(), \PDO::PARAM_STR);  // Liaison du prix
+            $query->bindValue(':orderId', $orderItem->getOrderId(), PDO::PARAM_INT);
+            $query->bindValue(':productId', $orderItem->getProductId(), PDO::PARAM_INT);
+            $query->bindValue(':quantity', $orderItem->getQuantity(), PDO::PARAM_INT);
+            $query->bindValue(':price', $orderItem->getPrice(), PDO::PARAM_STR);  // Liaison du prix
 
             // Exécution de la requête et vérification de la réussite
             if ($query->execute()) {
@@ -73,11 +113,11 @@ class OrderItemManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Lier les paramètres à la requête SQL
-            $stmt->bindValue(':orderId', $orderItem->getOrderId(), \PDO::PARAM_INT);
-            $stmt->bindValue(':productId', $orderItem->getProductId(), \PDO::PARAM_INT);
-            $stmt->bindValue(':quantity', $orderItem->getQuantity(), \PDO::PARAM_INT);
-            $stmt->bindValue(':price', $orderItem->getPrice(), \PDO::PARAM_STR);
-            $stmt->bindValue(':id', $orderItem->getId(), \PDO::PARAM_INT);
+            $stmt->bindValue(':orderId', $orderItem->getOrderId(), PDO::PARAM_INT);
+            $stmt->bindValue(':productId', $orderItem->getProductId(), PDO::PARAM_INT);
+            $stmt->bindValue(':quantity', $orderItem->getQuantity(), PDO::PARAM_INT);
+            $stmt->bindValue(':price', $orderItem->getPrice(), PDO::PARAM_STR);
+            $stmt->bindValue(':id', $orderItem->getId(), PDO::PARAM_INT);
 
             // Exécuter la requête et retourner true si cela a fonctionné
             return $stmt->execute();
@@ -94,7 +134,7 @@ class OrderItemManager extends AbstractManager
             $query = $this->pdo->prepare('DELETE FROM orders_items WHERE id = :id');
             
             // Lier l'ID de l'article à supprimer
-            $query->bindValue(':id', $id, \PDO::PARAM_INT);
+            $query->bindValue(':id', $id, PDO::PARAM_INT);
             
             // Exécuter la requête et retourner true si la suppression a réussi
             return $query->execute();
