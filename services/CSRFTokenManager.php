@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Services;
+
 class CSRFTokenManager
 {
     // Générer un token CSRF et le stocker dans la session
@@ -19,10 +21,10 @@ class CSRFTokenManager
     {
         // Vérifier si le token stocké en session correspond à celui fourni par l'utilisateur
         if (isset($_SESSION['csrf-token']) && hash_equals($_SESSION['csrf-token'], $token)) {
+            $this->removeCSRFToken();  // Suppression du token après validation
             // Si les tokens correspondent, on retourne vrai
             return true;
         }
-
         // Si le token est absent ou incorrect, on retourne faux
         return false;
     }
@@ -30,6 +32,6 @@ class CSRFTokenManager
     // Supprimer le token CSRF après utilisation (optionnel)
     public function removeCSRFToken(): void
     {
-        unset($_SESSION['csrf-token']); // Supprime le token de la session
+        unset($_SESSION['csrf-token']); // / Supprime le token de la session
     }
 }
