@@ -9,6 +9,15 @@ class Order
     private string $orderDate;
     private string $status;
 
+    // Constructeur pour initialiser les propriétés
+    public function __construct(int $id, int $userId, string $orderDate, string $status)
+    {
+        $this->id = $id;
+        $this->userId = $userId;
+        $this->orderDate = $orderDate;
+        $this->status = $status;
+    }
+
     // Getter et Setter pour l'ID
     public function getId(): int
     {
