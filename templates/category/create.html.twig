@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une Catégorie{% endblock %}
+
+{% block body %}
+    <h1>Ajouter une nouvelle Catégorie</h1>
+
+    <form method="POST" action="{{ path('/categories/create') }}">
+        <div>
+            <label for="name">Nom :</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <button type="submit">Ajouter</button>
+    </form>
+{% endblock %}
