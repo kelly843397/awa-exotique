@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Services;
-
 class CSRFTokenManager
 {
     // Générer un token CSRF et le stocker dans la session
