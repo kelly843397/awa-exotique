@@ -3,6 +3,7 @@
 namespace App\Managers;
 // Importation de la classe Product depuis le namespace App\Models pour l'utiliser dans ce fichier
 use App\Models\Product;
+use PDO;
 
 class ProductManager extends AbstractManager
 {
@@ -16,7 +17,7 @@ class ProductManager extends AbstractManager
         $stmt = $this->pdo->query($query);
         
         // Retourne tous les résultats sous forme de tableau associatif
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Méthode pour récupérer un produit par son ID
@@ -29,13 +30,13 @@ class ProductManager extends AbstractManager
         $stmt = $this->pdo->prepare($query);
 
         // Lier l'ID au paramètre de la requête
-        $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         // Exécuter la requête
         $stmt->execute();
 
         // Récupérer le produit
-        $product = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Retourner le produit ou null si non trouvé
         return $product ? $product : null;
@@ -52,10 +53,10 @@ class ProductManager extends AbstractManager
         $stmt = $this->pdo->prepare($query);
 
         // Lier les valeurs aux paramètres
-        $stmt->bindValue(':name', $name, \PDO::PARAM_STR);
-        $stmt->bindValue(':price', $price, \PDO::PARAM_STR); // Utilise PDO::PARAM_STR pour les valeurs float
-        $stmt->bindValue(':category_id', $categoryId, \PDO::PARAM_INT);
-        $stmt->bindValue(':picture', $picture, \PDO::PARAM_STR);
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+        $stmt->bindValue(':price', $price, PDO::PARAM_STR); // Utilise PDO::PARAM_STR pour les valeurs float
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':picture', $picture, PDO::PARAM_STR);
 
         // Exécuter la requête
         return $stmt->execute();
@@ -73,11 +74,11 @@ class ProductManager extends AbstractManager
         $stmt = $this->pdo->prepare($query);
 
         // Lier les valeurs aux paramètres
-        $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
-        $stmt->bindValue(':name', $name, \PDO::PARAM_STR);
-        $stmt->bindValue(':price', $price, \PDO::PARAM_STR);
-        $stmt->bindValue(':category_id', $categoryId, \PDO::PARAM_INT);
-        $stmt->bindValue(':picture', $picture, \PDO::PARAM_STR);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+        $stmt->bindValue(':price', $price, PDO::PARAM_STR);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
+        $stmt->bindValue(':picture', $picture, PDO::PARAM_STR);
 
         // Exécuter la requête
         return $stmt->execute();
@@ -89,13 +90,13 @@ class ProductManager extends AbstractManager
         // Supprimer d'abord toutes les lignes liées à ce produit dans orders_items
         $queryOrdersItems = "DELETE FROM orders_items WHERE product_id = :id";
         $stmtOrdersItems = $this->pdo->prepare($queryOrdersItems);
-        $stmtOrdersItems->bindValue(':id', $id, \PDO::PARAM_INT);
+        $stmtOrdersItems->bindValue(':id', $id, PDO::PARAM_INT);
         $stmtOrdersItems->execute();
 
         // Ensuite, supprimer le produit lui-même
         $queryProduct = "DELETE FROM products WHERE id = :id";
         $stmtProduct = $this->pdo->prepare($queryProduct);
-        $stmtProduct->bindValue(':id', $id, \PDO::PARAM_INT);
+        $stmtProduct->bindValue(':id', $id, PDO::PARAM_INT);
 
         // Exécuter la requête pour supprimer le produit
         return $stmtProduct->execute();
@@ -111,13 +112,13 @@ class ProductManager extends AbstractManager
         $stmt = $this->pdo->prepare($query);
 
         // Lier l'ID de la catégorie
-        $stmt->bindValue(':category_id', $categoryId, \PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
 
         // Exécuter la requête
         $stmt->execute();
 
         // Retourner tous les résultats sous forme de tableau associatif
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Méthode pour rechercher des produits par mot-clé
@@ -130,13 +131,13 @@ class ProductManager extends AbstractManager
         $stmt = $this->pdo->prepare($sql);
 
         // Lier le mot-clé avec des wildcards pour la recherche
-        $stmt->bindValue(':query', '%' . $query . '%', \PDO::PARAM_STR);
+        $stmt->bindValue(':query', '%' . $query . '%', PDO::PARAM_STR);
 
         // Exécuter la requête
         $stmt->execute();
 
         // Retourner tous les résultats sous forme de tableau associatif
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 

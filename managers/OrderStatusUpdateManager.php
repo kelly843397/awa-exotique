@@ -3,6 +3,7 @@
 namespace App\Managers;
 
 use App\Models\OrderStatusUpdate;
+use PDO;
 
 class OrderStatusUpdateManager extends AbstractManager
 {
@@ -12,7 +13,7 @@ class OrderStatusUpdateManager extends AbstractManager
         $query = $this->pdo->prepare('SELECT * FROM orders_status_updates');
         $query->execute();
 
-        $result = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
         $statusUpdates = [];
 
         foreach ($result as $item) {
@@ -32,10 +33,10 @@ class OrderStatusUpdateManager extends AbstractManager
     public function find(int $orderId): ?OrderStatusUpdate
     {
         $query = $this->pdo->prepare('SELECT * FROM orders_status_updates WHERE order_id = :orderId');
-        $query->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
+        $query->bindValue(':orderId', $orderId, PDO::PARAM_INT);
         $query->execute();
 
-        $result = $query->fetch(\PDO::FETCH_ASSOC);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
             return new OrderStatusUpdate(
@@ -60,8 +61,8 @@ class OrderStatusUpdateManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Liaison des paramètres
-            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
-            $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
 
             // Exécuter la requête et retourner true si l'insertion a réussi
             return $stmt->execute();
@@ -83,8 +84,8 @@ class OrderStatusUpdateManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Liaison des paramètres
-            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
-            $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
 
             // Exécuter la requête et retourner true si la mise à jour a réussi
             return $stmt->execute();
@@ -105,7 +106,7 @@ class OrderStatusUpdateManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Liaison du paramètre
-            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
+            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
 
             // Exécuter la requête et retourner true si la suppression a réussi
             return $stmt->execute();
