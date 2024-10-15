@@ -3,13 +3,15 @@
 {% block title %}Ajouter une Catégorie{% endblock %}
 
 {% block body %}
-    <h1>Ajouter une nouvelle Catégorie</h1>
-
-    <form method="POST" action="{{ path('/categories/create') }}">
-        <div>
-            <label for="name">Nom :</label>
-            <input type="text" id="name" name="name" required>
-        </div>
+    <h1>Ajouter une nouvelle catégorie</h1>
+    <form method="POST" action="/awa-exotique/index.php/create">
+        <label for="name">Nom de la catégorie :</label>
+        <input type="text" name="name" id="name" required>
+        
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
         <button type="submit">Ajouter</button>
     </form>
+
 {% endblock %}

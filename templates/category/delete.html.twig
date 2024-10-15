@@ -3,12 +3,14 @@
 {% block title %}Supprimer la Catégorie{% endblock %}
 
 {% block body %}
-    <h1>Supprimer la Catégorie</h1>
-
-    <p>Êtes-vous sûr de vouloir supprimer cette catégorie ?</p>
-
-    <form method="POST" action="{{ path('/categories/delete', {id: id}) }}">
-        <button type="submit">Oui, supprimer</button>
-        <a href="{{ path('/categories') }}">Annuler</a>
+    <h1>Confirmer la suppression</h1>
+    <form method="POST" action="/awa-exotique/index.php/delete?id={{ id }}">
+        <p>Êtes-vous sûr de vouloir supprimer cette catégorie ?</p>
+        
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <button type="submit">Supprimer</button>
     </form>
+
 {% endblock %}
