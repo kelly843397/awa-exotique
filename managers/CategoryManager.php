@@ -7,7 +7,7 @@ use App\Models\Category;
 class CategoryManager extends AbstractManager
 {
    // Méthode pour récupérer toutes les catégories
-       public function getAllCategories(): array
+       public function findAll(): array
     {
         try {
             // Requête SQL pour récupérer toutes les catégories
@@ -30,7 +30,7 @@ class CategoryManager extends AbstractManager
     }
 
     // Méthode pour récupérer une catégorie par son ID 
-    public function getCategoryById(int $id): ?array
+    public function find(int $id): ?array
     {
         try {
             // Requête SQL pour récupérer la catégorie par ID
@@ -58,7 +58,7 @@ class CategoryManager extends AbstractManager
     }
 
     // Méthode pour ajouter une nouvelle catégorie
-    public function addCategory(string $name): bool
+    public function create(string $name): bool
     {
         try {
             // Requête SQL pour insérer une nouvelle catégorie
@@ -79,7 +79,7 @@ class CategoryManager extends AbstractManager
     }
 
     // Méthode pour mettre à jour une catégorie
-    public function updateCategory(int $id, string $name): bool
+    public function update(int $id, string $name): bool
     {
         try {
             // Requête SQL pour mettre à jour le nom d'une catégorie par son ID
@@ -101,7 +101,7 @@ class CategoryManager extends AbstractManager
     }
 
     // Méthode pour supprimer une catégorie par son ID
-    public function deleteCategory(int $id): bool
+    public function delete(int $id): bool
     {
         try {
             // Requête SQL pour supprimer une catégorie par son ID
