@@ -1,8 +1,4 @@
 <?php
-// Déclaration du namespace App\Managers, définissant l'espace de noms pour cette classe afin de mieux organiser et éviter les conflits de nommage avec d'autres classes
-namespace App\Managers;
-// Importation de la classe User depuis le namespace App\Models pour l'utiliser dans ce fichier
-use App\Models\User;
 
 class UserManager extends AbstractManager
 {
