@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Models;
-
 class User
 {
     private ?int $id;

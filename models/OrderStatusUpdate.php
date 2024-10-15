@@ -1,7 +1,5 @@
 <?php
 
-namespace App\Models;
-
 class OrderStatusUpdate
 {
     private ?int $id;
