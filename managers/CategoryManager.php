@@ -1,10 +1,5 @@
 <?php
 
-namespace App\Managers;
-
-use App\Models\Category;
-use PDO;
-
 class CategoryManager extends AbstractManager
 {
    // Méthode pour récupérer toutes les catégories

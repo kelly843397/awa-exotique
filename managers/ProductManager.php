@@ -1,9 +1,4 @@
 <?php
-// Déclaration du namespace App\Managers, définissant l'espace de noms pour cette classe afin de mieux organiser et éviter les conflits de nommage avec d'autres classes
-namespace App\Managers;
-// Importation de la classe Product depuis le namespace App\Models pour l'utiliser dans ce fichier
-use App\Models\Product;
-use PDO;
 
 class ProductManager extends AbstractManager
 {

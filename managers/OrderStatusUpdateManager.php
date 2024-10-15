@@ -1,10 +1,5 @@
 <?php
 
-namespace App\Managers;
-
-use App\Models\OrderStatusUpdate;
-use PDO;
-
 class OrderStatusUpdateManager extends AbstractManager
 {
     // Méthode pour récupérer toutes les mises à jour de Orderstatus
@@ -106,7 +101,7 @@ class OrderStatusUpdateManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Liaison du paramètre
-            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
+            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
 
             // Exécuter la requête et retourner true si la suppression a réussi
             return $stmt->execute();

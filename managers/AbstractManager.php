@@ -1,9 +1,5 @@
 <?php
 
-namespace App\Managers;
-
-use PDO;
-
 abstract class AbstractManager
 {
     protected PDO $pdo;

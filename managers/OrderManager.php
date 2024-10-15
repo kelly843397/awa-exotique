@@ -1,10 +1,5 @@
 <?php
 
-namespace App\Managers;
-
-use App\Models\Order;
-use PDO;
-
 class OrderManager extends AbstractManager
 {
     // Nom de la table à manipuler dans la base de données
