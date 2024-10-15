@@ -3,6 +3,7 @@
 namespace App\Managers;
 
 use App\Models\Category;
+use PDO;
 
 class CategoryManager extends AbstractManager
 {
@@ -22,7 +23,7 @@ class CategoryManager extends AbstractManager
             }
 
             // Retourner les résultats sous forme de tableau associatif
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             // Gérer les erreurs SQL
             return [];
@@ -40,13 +41,13 @@ class CategoryManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Lier l'ID au paramètre de la requête
-            $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
             // Exécuter la requête
             $stmt->execute();
 
             // Récupérer le résultat sous forme de tableau associatif
-            $category = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $category = $stmt->fetch(PDO::FETCH_ASSOC);
 
             // Retourner la catégorie si elle existe, sinon null
             return $category ?: null;
@@ -68,7 +69,7 @@ class CategoryManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Lier le nom de la catégorie au paramètre SQL
-            $stmt->bindValue(':name', $name, \PDO::PARAM_STR);
+            $stmt->bindValue(':name', $name, PDO::PARAM_STR);
 
             // Exécuter la requête et retourner true si cela a fonctionné
             return $stmt->execute();
@@ -89,8 +90,8 @@ class CategoryManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Lier les paramètres à la requête SQL
-            $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
-            $stmt->bindValue(':name', $name, \PDO::PARAM_STR);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->bindValue(':name', $name, PDO::PARAM_STR);
 
             // Exécuter la requête et retourner true si cela a fonctionné
             return $stmt->execute();
@@ -111,7 +112,7 @@ class CategoryManager extends AbstractManager
             $stmt = $this->pdo->prepare($query);
 
             // Lier l'ID de la catégorie au paramètre SQL
-            $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
             // Exécuter la requête et retourner true si cela a fonctionné
             return $stmt->execute();
