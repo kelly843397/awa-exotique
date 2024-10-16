@@ -1,28 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier le produit {{ product.name }}{% endblock %}
+{% block title %}
+    Modifier le Produit
+{% endblock %}
 
-{% block body %}
-    <h1>Modifier le produit {{ product.name }}</h1>
-    
-    {% if error is defined %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    
-    <form action="/products/{{ product.id }}/update" method="post">
-        <label for="name">Nom :</label>
+{% block content %}
+    <h1>Modifier le Produit</h1>
+
+    <form method="POST" action="/awa-exotique/products/edit?id={{ product.id }}">
+        <label for="name">Nom du produit :</label>
         <input type="text" name="name" id="name" value="{{ product.name }}" required>
-        
+
         <label for="price">Prix :</label>
-        <input type="number" name="price" id="price" value="{{ product.price }}" required>
-        
+        <input type="number" name="price" id="price" value="{{ product.price }}" step="0.01" required>
+
         <label for="category_id">Catégorie :</label>
         <input type="number" name="category_id" id="category_id" value="{{ product.category_id }}" required>
-        
-        <label for="picture">Image (URL) :</label>
-        <input type="text" name="picture" id="picture" value="{{ product.picture }}" required>
-        
-        <button type="submit">Modifier</button>
+
+        <label for="picture">URL de l'image :</label>
+        <input type="text" name="picture" id="picture" value="{{ product.picture }}">
+
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <button type="submit">Modifier le produit</button>
     </form>
-    <br><a href="/products">Retour à la liste des produits</a>
 {% endblock %}

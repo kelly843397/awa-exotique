@@ -1,28 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter un produit{% endblock %}
+{% block title %}
+    Ajouter un Nouveau Produit
+{% endblock %}
 
-{% block body %}
-    <h1>Ajouter un produit</h1>
-    
-    {% if error is defined %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    
-    <form action="/products/store" method="post">
-        <label for="name">Nom :</label>
+{% block content %}
+    <h1>Ajouter un Nouveau Produit</h1>
+
+    <form method="POST" action="/awa-exotique/products/create">
+        <label for="name">Nom du produit :</label>
         <input type="text" name="name" id="name" required>
-        
+
         <label for="price">Prix :</label>
-        <input type="number" name="price" id="price" required>
-        
+        <input type="number" name="price" id="price" step="0.01" required>
+
         <label for="category_id">Catégorie :</label>
         <input type="number" name="category_id" id="category_id" required>
-        
-        <label for="picture">Image (URL) :</label>
-        <input type="text" name="picture" id="picture" required>
-        
-        <button type="submit">Ajouter</button>
+
+        <label for="picture">URL de l'image :</label>
+        <input type="text" name="picture" id="picture">
+
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <button type="submit">Ajouter le produit</button>
     </form>
-    <br><a href="/products">Retour à la liste des produits</a>
 {% endblock %}

@@ -1,19 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Résultats de la recherche{% endblock %}
+{% block title %}
+    Résultats de la Recherche pour "{{ query }}"
+{% endblock %}
 
-{% block body %}
-    <h1>Résultats de la recherche pour "{{ query }}"</h1>
-    
+{% block content %}
+    <h1>Résultats de la Recherche pour "{{ query }}"</h1>
+
     <ul>
         {% for product in products %}
             <li>
-                <a href="/products/{{ product.id }}">{{ product.name }}</a> - {{ product.price }}€
+                <strong>{{ product.name }}</strong> - {{ product.price }} €
+                <a href="/awa-exotique/products/show?id={{ product.id }}">Voir</a>
             </li>
         {% else %}
-            <p>Aucun produit trouvé pour "{{ query }}".</p>
+            <li>Aucun produit correspondant trouvé.</li>
         {% endfor %}
     </ul>
-    
-    <a href="/products">Retour à la liste des produits</a>
+
+    <a href="/awa-exotique/products">Retour à la liste des produits</a>
 {% endblock %}
