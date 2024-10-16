@@ -2,9 +2,9 @@
 
 {% block title %}Supprimer la Catégorie{% endblock %}
 
-{% block body %}
+ {% block content %}
     <h1>Confirmer la suppression</h1>
-    <form method="POST" action="/awa-exotique/index.php/delete?id={{ id }}">
+    <form method="POST" action="/awa-exotique/delete?id={{ category.id }}">
         <p>Êtes-vous sûr de vouloir supprimer cette catégorie ?</p>
         
         <!-- Inclure le token CSRF -->

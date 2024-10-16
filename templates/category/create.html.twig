@@ -2,9 +2,9 @@
 
 {% block title %}Ajouter une Catégorie{% endblock %}
 
-{% block body %}
+ {% block content %}
     <h1>Ajouter une nouvelle catégorie</h1>
-    <form method="POST" action="/awa-exotique/index.php/create">
+    <form method="POST" action="/awa-exotique/categories/create">
         <label for="name">Nom de la catégorie :</label>
         <input type="text" name="name" id="name" required>
         

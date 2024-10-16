@@ -2,9 +2,9 @@
 
 {% block title %}Modifier la Catégorie{% endblock %}
 
-{% block body %}
+ {% block content %}
     <h1>Modifier la catégorie : {{ category.name }}</h1>
-    <form method="POST" action="/awa-exotique/index.php/edit?id={{ category.id }}">
+    <form method="POST" action="/awa-exotique/edit?id={{ category.id }}">
         <label for="name">Nom de la catégorie :</label>
         <input type="text" name="name" id="name" value="{{ category.name }}" required>
         
