@@ -1,38 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block content %}
-<h1>Liste des statuts de commande</h1>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>ID Commande</th>
-        <th>Statut</th>
-        <th>Date de mise à jour</th>
-        <th>Actions</th>
-    </tr>
-    {% for status in statuses %}
-    <tr>
-        <td>{{ status.id }}</td>
-        <td>{{ status.orderId }}</td>
-        <td>{{ status.status }}</td>
-        <td>{{ status.updatedAt }}</td>
-        <td>
-            <!-- Lien pour la modification -->
-            <a href="/orderstatus/update/{{ status.orderId }}">Modifier</a>
-            
-            <!-- Formulaire de suppression -->
-            <form action="/orderstatus/delete/{{ order.id }}" method="POST" style="display:inline;">
-                <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')">Supprimer</button>
-            </form>
+{% block title %}
+    Mises à jour de statut de commande
+{% endblock %}
 
-        </td>
-    </tr>
-    {% else %}
-    <tr>
-        <td colspan="5">Aucun statut de commande disponible.</td>
-    </tr>
-    {% endfor %}
-</table>
-<!-- Lien pour ajouter un nouveau statut -->
-<a href="/orderstatus/create">Ajouter un nouveau statut</a>
+{% block content %}
+    <h1>Mises à jour de statut de commande</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Commande ID</th>
+                <th>Statut</th>
+                <th>Date de mise à jour</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for update in statusUpdates %}
+                <tr>
+                    <td>{{ update.order_id }}</td>
+                    <td>{{ update.status }}</td>
+                    <td>{{ update.updated_at }}</td>
+                    <td>
+                        <!-- Lien pour modifier la mise à jour du statut -->
+                        <a href="/awa-exotique/orders/{{ update.order_id }}/status/edit">Modifier</a> |
+                        <!-- Lien pour supprimer la mise à jour du statut -->
+                        <a href="/awa-exotique/orders/{{ update.order_id }}/status/delete">Supprimer</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">Aucune mise à jour de statut trouvée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

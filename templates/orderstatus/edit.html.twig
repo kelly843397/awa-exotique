@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Modifier la mise à jour de statut
+{% endblock %}
+
+{% block content %}
+    <h1>Modifier la mise à jour de statut pour la commande {{ statusUpdate.order_id }}</h1>
+
+    <form method="POST" action="/awa-exotique/orders/{{ statusUpdate.order_id }}/status/edit">
+        <label for="status">Statut :</label>
+        <input type="text" name="status" id="status" value="{{ statusUpdate.status }}" required>
+
+        <!-- Token CSRF pour la sécurité -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <button type="submit">Modifier</button>
+    </form>
+{% endblock %}

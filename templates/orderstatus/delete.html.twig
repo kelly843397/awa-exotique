@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Supprimer la mise à jour de statut
+{% endblock %}
+
+{% block content %}
+    <h1>Supprimer la mise à jour de statut pour la commande {{ orderId }}</h1>
+
+    <p>Êtes-vous sûr de vouloir supprimer cette mise à jour de statut ?</p>
+
+    <form method="POST" action="/awa-exotique/orders/{{ orderId }}/status/delete">
+        <!-- Token CSRF pour la sécurité -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">Supprimer</button>
+    </form>
+
+    <!-- Lien pour annuler la suppression -->
+    <a href="/awa-exotique/orders/{{ orderId }}/status">Annuler</a>
+{% endblock %}
