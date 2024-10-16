@@ -1,133 +1,102 @@
 <?php
 
-namespace App\Controllers;
-
-use App\Managers\OrderStatusUpdateManager; // Assure-toi d'importer correctement le manager
-use App\Controllers\AbstractController;    // Assure-toi d'importer correctement l'AbstractController
-
 class OrderStatusController extends AbstractController
 {
-    /**
-     * Action pour lister tous les statuts de commande
-     */
-    public function findAll()
+    // Afficher toutes les mises à jour de statut de commande
+    public function index(): void
     {
-        // Instanciation du manager directement dans la méthode
-        $orderStatusUpdateManager = new OrderStatusUpdateManager();
+        $orderStatusManager = new OrderStatusUpdateManager();
+        $statusUpdates = $orderStatusManager->findAll();
 
-        // Récupération de tous les statuts via le manager
-        $statuses = $orderStatusUpdateManager->findAll();
-
-        // Affichage de la vue avec Twig en utilisant $this->render hérité d'AbstractController
-        return $this->render('orderstatus/index.html.twig', ['statuses' => $statuses]);
+        $this->render('order_status/index.html.twig', ['statusUpdates' => $statusUpdates]);
     }
 
-    /**
-     * Action pour créer un nouveau statut de commande
-     */
-    public function create()
+    // Créer une nouvelle mise à jour de statut de commande
+    public function create(int $orderId): void
     {
-        $orderStatusUpdateManager = new OrderStatusUpdateManager();
+        // Redirection si l'utilisateur n'est pas administrateur
+        $this->redirectIfNotAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $orderId = $_POST['order_id'];
-            $status = $_POST['status'];
+            $csrfManager = new CSRFTokenManager();
+            if (!$csrfManager->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                die("Token CSRF invalide.");
+            }
 
-            if (!empty($orderId) && !empty($status)) {
-                echo "Données reçues : Order ID = $orderId, Statut = $status <br>";
+            $status = $_POST['status'] ?? '';
 
-                // Appel du manager pour créer le statut
-                if ($orderStatusUpdateManager->createOrderStatus($orderId, $status)) {
-                   // Redirection après création
-                   return $this->redirect('/orderstatus');
-                } else {
-                    echo "Erreur lors de l'appel au manager.<br>";
-                }
-            } else {
-                echo "Les champs sont vides.<br>";
+            $orderStatusManager = new OrderStatusUpdateManager();
+
+            try {
+                $orderStatusManager->createOrderStatus($orderId, $status);
+                $this->redirect('/orders/' . $orderId . '/status'); // Redirection après création
+            } catch (\Exception $e) {
+                echo "Erreur : " . $e->getMessage();
             }
         }
 
-        // Afficher le formulaire de création avec Twig
-        return $this->render('orderstatus/create.html.twig', [
-            'status' => null
-        ]);
+        $this->render('order_status/create.html.twig', ['orderId' => $orderId]);
     }
 
-    /**
-     * Action pour mettre à jour un statut de commande
-     */
-    public function update($orderId)
+    // Mettre à jour une mise à jour de statut de commande
+    public function edit(int $orderId): void
     {
-        // Instanciation du manager directement dans la méthode
-        $orderStatusUpdateManager = new OrderStatusUpdateManager();
+        // Redirection si l'utilisateur n'est pas administrateur
+        $this->redirectIfNotAdmin();
 
-        // Debug de l'orderId reçu dans l'URL
-        var_dump("Order ID reçu : ", $orderId);
+        $orderStatusManager = new OrderStatusUpdateManager();
+        $statusUpdate = $orderStatusManager->find($orderId);
 
-        // Vérifier si les données POST sont soumises pour mise à jour
+        if (!$statusUpdate) {
+            $this->redirect('/404'); // Redirection si la mise à jour de statut n'est pas trouvée
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $status = $_POST['status'];
+            $csrfManager = new CSRFTokenManager();
+            if (!$csrfManager->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                die("Token CSRF invalide.");
+            }
 
-            // Debug du statut envoyé via le formulaire
-            var_dump("Statut reçu via POST : ", $status);
+            $status = $_POST['status'] ?? '';
 
-            // Validation basique des données
-            if (!empty($status)) {
-                // Appel du manager pour mise à jour
-                if ($orderStatusUpdateManager->updateOrderStatus($orderId, $status)) {
-                    // Debug : confirmation de la mise à jour réussie
-                    var_dump("Mise à jour réussie pour l'ID : ", $orderId);
-
-                    // Rediriger après mise à jour
-                    return $this->redirect('/orderstatus/update/' . $orderId);
-                } else {
-                    echo "Erreur lors de la mise à jour du statut.";
-                }
-            } else {
-                echo "Veuillez remplir le champ de statut.";
+            try {
+                $orderStatusManager->updateOrderStatus($orderId, $status);
+                $this->redirect('/orders/' . $orderId . '/status'); // Redirection après mise à jour
+            } catch (\Exception $e) {
+                echo "Erreur : " . $e->getMessage();
             }
         }
 
-        // Récupérer le statut existant pour le formulaire de mise à jour
-        $statusUpdate = $orderStatusUpdateManager->find($orderId);
-
-        // Debug du statut récupéré avant d'afficher la vue
-        var_dump("Statut récupéré pour l'ID : ", $statusUpdate);
-
-        // Afficher la vue de mise à jour avec Twig
-       return $this->render('orderstatus/update.html.twig', ['statusUpdate' => $statusUpdate]);
+        $this->render('order_status/edit.html.twig', ['statusUpdate' => $statusUpdate]);
     }
 
-    /**
-     * Action pour supprimer un statut de commande
-     */
-    public function delete($orderId): bool
+    // Supprimer une mise à jour de statut de commande
+    public function delete(int $orderId): void
     {
-        // Débogage pour voir si l'order_id est bien récupéré
-        error_log("Order ID reçu dans la méthode delete : " . $orderId);
-        
-        // Vérifier si la méthode est POST
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Instanciation du manager directement dans la méthode
-            $orderStatusUpdateManager = new OrderStatusUpdateManager();
+        // Redirection si l'utilisateur n'est pas administrateur
+        $this->redirectIfNotAdmin();
 
-            // Appel du manager pour supprimer le statut
-            if ($orderStatusUpdateManager->deleteOrderStatus($orderId)) {
-                error_log("Suppression réussie pour l'ID : " . $orderId); // Log la suppression
-                // Rediriger après suppression
-                $this->redirect('/orderstatus');
-                
-                return true; // Retourner true en cas de succès
-            } else {
-                error_log("Erreur lors de la suppression de l'ID : " . $orderId);
-                return false; // Retourner false en cas d'erreur
-            }
-        } else {
-            error_log("Méthode non autorisée");
-            // Si la méthode n'est pas POST, afficher un message d'erreur
-            return false; // Retourner false si la méthode n'est pas POST
+        $orderStatusManager = new OrderStatusUpdateManager();
+        $statusUpdate = $orderStatusManager->find($orderId);
+
+        if (!$statusUpdate) {
+            $this->redirect('/404'); // Redirection si la mise à jour de statut n'est pas trouvée
         }
-    }
 
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $csrfManager = new CSRFTokenManager();
+            if (!$csrfManager->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                die("Token CSRF invalide.");
+            }
+
+            try {
+                $orderStatusManager->deleteOrderStatus($orderId);
+                $this->redirect('/orders/' . $orderId . '/status'); // Redirection après suppression
+            } catch (\Exception $e) {
+                echo "Erreur : " . $e->getMessage();
+            }
+        }
+
+        $this->render('order_status/delete.html.twig', ['orderId' => $orderId]);
+    }
 }
