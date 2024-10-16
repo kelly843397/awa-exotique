@@ -1,17 +1,14 @@
 <?php
 
-namespace App\Controllers;
-
-use App\Managers\CategoryManager;
-
 class CategoryController extends AbstractController
 {
     // Afficher la liste des catégories (accès public ou limité selon les besoins)
     public function index(): void
     {
-        // Création d'une instance de CategoryManager sans constructeur
+        // Création d'une instance de CategoryManager
         $categoryManager = new CategoryManager();
         $categories = $categoryManager->findAll();
+
 
         // Affichage de la liste des catégories
         $this->render('category/index.html.twig', ['categories' => $categories]);
@@ -38,24 +35,29 @@ class CategoryController extends AbstractController
         // Vérification de l'accès administrateur
         $this->redirectIfNotAdmin();
 
+        // Instancier le CSRFTokenManager
+        $csrfManager = new CSRFTokenManager();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Vérifier le token CSRF
+            if (!$csrfManager->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                die("CSRF token invalide.");
+            }
+
             // Protection contre les injections XSS
             $name = htmlspecialchars(trim($_POST['name'] ?? ''));
 
-            // Vérification de la validité des données (exemple : si le champ name n'est pas vide)
+            // Vérification de la validité des données
             if (!empty($name)) {
-                // Création d'une instance de CategoryManager
                 $categoryManager = new CategoryManager();
-
-                // Création de la catégorie dans la base de données
                 $categoryManager->create($name);
-
                 $this->redirect('/categories'); // Redirection après la création
             }
         }
 
-        // Affichage du formulaire d'ajout
-        $this->render('category/create.html.twig');
+        // Générer un token CSRF pour le formulaire
+        $csrfToken = $csrfManager->generateCSRFToken();
+        $this->render('category/create.html.twig', ['csrf_token' => $csrfToken]);
     }
 
     // Modifier une catégorie existante (accès réservé à l'administrateur)
@@ -63,6 +65,9 @@ class CategoryController extends AbstractController
     {
         // Vérification de l'accès administrateur
         $this->redirectIfNotAdmin();
+
+        // Instancier le CSRFTokenManager
+        $csrfManager = new CSRFTokenManager();
 
         // Création d'une instance de CategoryManager
         $categoryManager = new CategoryManager();
@@ -73,19 +78,24 @@ class CategoryController extends AbstractController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Vérifier le token CSRF
+            if (!$csrfManager->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                die("CSRF token invalide.");
+            }
+
             // Protection contre les injections XSS
             $name = htmlspecialchars(trim($_POST['name'] ?? ''));
 
             // Vérification des données
             if (!empty($name)) {
-                // Mise à jour de la catégorie
                 $categoryManager->update($id, $name);
                 $this->redirect('/categories'); // Redirection après la modification
             }
         }
 
-        // Affichage du formulaire de modification
-        $this->render('category/edit.html.twig', ['category' => $category]);
+        // Générer un token CSRF pour le formulaire
+        $csrfToken = $csrfManager->generateCSRFToken();
+        $this->render('category/edit.html.twig', ['category' => $category, 'csrf_token' => $csrfToken]);
     }
 
     // Supprimer une catégorie (accès réservé à l'administrateur)
@@ -94,7 +104,15 @@ class CategoryController extends AbstractController
         // Vérification de l'accès administrateur
         $this->redirectIfNotAdmin();
 
+        // Instancier le CSRFTokenManager
+        $csrfManager = new CSRFTokenManager();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Vérifier le token CSRF
+            if (!$csrfManager->validateCSRFToken($_POST['csrf_token'] ?? '')) {
+                die("CSRF token invalide.");
+            }
+
             // Création d'une instance de CategoryManager
             $categoryManager = new CategoryManager();
 
@@ -103,7 +121,8 @@ class CategoryController extends AbstractController
             $this->redirect('/categories'); // Redirection après suppression
         }
 
-        // Affichage d'une confirmation avant la suppression
-        $this->render('category/delete.html.twig', ['id' => $id]);
+        // Générer un token CSRF pour la confirmation de suppression
+        $csrfToken = $csrfManager->generateCSRFToken();
+        $this->render('category/delete.html.twig', ['id' => $id, 'csrf_token' => $csrfToken]);
     }
 }
