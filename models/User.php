@@ -9,10 +9,10 @@ class User
     private string $phone;
     private string $password;
     private string $role;
-    private string $createdAt;
+    private DateTime $createdAt; // Changer le type en DateTime
 
     // Constructeur
-    public function __construct(?int $id = null, string $firstName, string $lastName, string $email, string $phone, string $password, string $role, string $createdAt)
+    public function __construct(string $firstName, string $lastName, string $email, string $phone, string $password, string $role, DateTime $createdAt, ?int $id = null)
     {
         $this->id = $id;
         $this->firstName = $firstName;
@@ -60,7 +60,7 @@ class User
         return $this->role;
     }
 
-    public function getCreatedAt(): string
+    public function getCreatedAt(): DateTime // Retourner un objet DateTime
     {
         return $this->createdAt;
     }
@@ -96,7 +96,7 @@ class User
         $this->role = $role;
     }
 
-    public function setCreatedAt(string $createdAt): void
+    public function setCreatedAt(DateTime $createdAt): void // Accepter un objet DateTime
     {
         $this->createdAt = $createdAt;
     }

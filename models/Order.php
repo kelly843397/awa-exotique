@@ -7,7 +7,7 @@ class Order
     private string $orderDate;
     private string $status;
 
-    public function __construct(?int $id, int $userId, string $orderDate, string $status)
+    public function __construct(int $userId, string $orderDate, string $status, ?int $id)
     {
         // Initialisation des propriétés de la classe
         $this->id = $id; 

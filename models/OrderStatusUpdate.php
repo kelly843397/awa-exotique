@@ -5,10 +5,10 @@ class OrderStatusUpdate
     private ?int $id;
     private int $orderId;
     private string $status;
-    private string $updatedAt;
+    private DateTime $updatedAt;
 
     // Constructeur
-    public function __construct(int $orderId, string $status, string $updatedAt, ?int $id = null)
+    public function __construct(int $orderId, string $status, DateTime $updatedAt, ?int $id = null)
     {
         $this->orderId = $orderId;
         $this->status = $status;
@@ -32,7 +32,7 @@ class OrderStatusUpdate
         return $this->status;
     }
 
-    public function getUpdatedAt(): string
+    public function getUpdatedAt(): DateTime
     {
         return $this->updatedAt;
     }
@@ -48,7 +48,7 @@ class OrderStatusUpdate
         $this->status = $status;
     }
 
-    public function setUpdatedAt(string $updatedAt): void
+    public function setUpdatedAt(DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
     }
