@@ -2,114 +2,118 @@
 
 class OrderItemManager extends AbstractManager
 {
-    // Méthode pour ajouter un nouvel article à une commande
-    public function createOrderItem(int $orderId, int $productId, int $quantity, float $price): bool
+    // Le constructeur accepte un objet PDO
+    public function __construct(PDO $pdo)
     {
-        try {
-            // Préparer la requête SQL pour insérer l'article dans la commande
-            $query = "INSERT INTO orders_items (order_id, product_id, quantity, price) 
-                      VALUES (:order_id, :product_id, :quantity, :price)";
-            $stmt = $this->pdo->prepare($query);
-            
-            // Lier les paramètres à la requête
-            $stmt->bindValue(':order_id', $orderId, PDO::PARAM_INT);
-            $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
-            $stmt->bindValue(':quantity', $quantity, PDO::PARAM_INT);
-            $stmt->bindValue(':price', $price, PDO::PARAM_STR);
-            
-            // Exécuter la requête
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            // Enregistrer l'erreur et renvoyer une exception
-            error_log($e->getMessage());
-            throw new \Exception("Erreur lors de l'ajout de l'article à la commande.");
-        }
+        // Utilise le PDO fourni pour la connexion
+        $this->pdo = $pdo;
     }
 
-    // Méthode pour récupérer tous les articles d'une commande
-    public function findAllOrderItemsByOrderId(int $orderId): array
+    /**
+     * Crée un nouvel élément de commande.
+     *
+     * @param OrderItem $orderItem L'objet OrderItem à insérer.
+     * @return int L'ID du nouvel élément inséré.
+     */
+    public function create(OrderItem $orderItem): int
     {
-        try {
-            // Préparer la requête SQL pour récupérer les articles d'une commande
-            $query = "SELECT oi.*, p.name FROM orders_items oi 
-                      JOIN products p ON oi.product_id = p.id 
-                      WHERE oi.order_id = :order_id";
-            $stmt = $this->pdo->prepare($query);
-            
-            // Lier l'ID de la commande à la requête
-            $stmt->bindValue(':order_id', $orderId, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            // Retourner les résultats sous forme de tableau associatif
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            error_log($e->getMessage());
-            throw new \Exception("Erreur lors de la récupération des articles de la commande.");
-        }
+        $query = $this->pdo->prepare(
+            'INSERT INTO orders_items (order_id, product_id, quantity, price) VALUES (:order_id, :product_id, :quantity, :price)'
+        );
+
+        $parameters = [
+            'order_id' => $orderItem->getOrderId(),
+            'product_id' => $orderItem->getProductId(),
+            'quantity' => $orderItem->getQuantity(),
+            'price' => $orderItem->getPrice(),
+        ];
+
+        $query->execute($parameters);
+        return $this->pdo->lastInsertId();
     }
 
-    // Méthode pour mettre à jour un article d'une commande
-    public function updateOrderItem(int $id, int $quantity, float $price): bool
+    /**
+     * Récupère un élément de commande par son ID.
+     *
+     * @param int $id L'identifiant de l'élément de commande à récupérer.
+     * @return OrderItem|null L'objet OrderItem trouvé ou null s'il n'existe pas.
+     */
+    public function findOne(int $id): ?OrderItem
     {
-        try {
-            // Préparer la requête SQL pour mettre à jour un article
-            $query = "UPDATE orders_items 
-                      SET quantity = :quantity, price = :price 
-                      WHERE id = :id";
-            $stmt = $this->pdo->prepare($query);
-            
-            // Lier les valeurs aux paramètres
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->bindValue(':quantity', $quantity, PDO::PARAM_INT);
-            $stmt->bindValue(':price', $price, PDO::PARAM_STR);
-            
-            // Exécuter la requête
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            error_log($e->getMessage());
-            throw new \Exception("Erreur lors de la mise à jour de l'article de la commande.");
+        $query = $this->pdo->prepare('SELECT * FROM orders_items WHERE id = :id');
+        $query->execute(['id' => $id]);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            return new OrderItem(
+                $result['order_id'],
+                $result['product_id'],
+                $result['quantity'],
+                $result['price'],
+                $result['id']
+            );
         }
+
+        return null;
     }
 
-    // Méthode pour supprimer un article d'une commande
-    public function deleteOrderItem(int $id): bool
+    /**
+     * Récupère tous les éléments de commande.
+     *
+     * @return array La liste des éléments de commande.
+     */
+    public function findAll(): array
     {
-        try {
-            // Préparer la requête SQL pour supprimer un article de la commande
-            $query = "DELETE FROM orders_items WHERE id = :id";
-            $stmt = $this->pdo->prepare($query);
-            
-            // Lier l'ID de l'article à supprimer
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            
-            // Exécuter la requête
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            error_log($e->getMessage());
-            throw new \Exception("Erreur lors de la suppression de l'article de la commande.");
+        $query = $this->pdo->prepare('SELECT * FROM orders_items');
+        $query->execute();
+        $results = $query->fetchAll(PDO::FETCH_ASSOC);
+        $orderItems = [];
+
+        foreach ($results as $item) {
+            $orderItems[] = new OrderItem(
+                $item['order_id'],
+                $item['product_id'],
+                $item['quantity'],
+                $item['price'],
+                $item['id']
+            );
         }
+
+        return $orderItems;
     }
 
-    // Méthode pour récupérer un article spécifique d'une commande
-    public function findOrderItemById(int $id): ?array
+    /**
+     * Met à jour un élément de commande.
+     *
+     * @param OrderItem $orderItem L'objet OrderItem à mettre à jour.
+     * @return bool Résultat de l'opération de mise à jour.
+     */
+    public function update(OrderItem $orderItem): bool
     {
-        try {
-            // Préparer la requête SQL pour récupérer un article par son ID
-            $query = "SELECT * FROM orders_items WHERE id = :id";
-            $stmt = $this->pdo->prepare($query);
-            
-            // Lier l'ID de l'article à la requête
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            // Récupérer l'article
-            $orderItem = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            // Retourner l'article ou null s'il n'est pas trouvé
-            return $orderItem ? $orderItem : null;
-        } catch (\PDOException $e) {
-            error_log($e->getMessage());
-            throw new \Exception("Erreur lors de la récupération de l'article de la commande.");
-        }
+        $query = $this->pdo->prepare(
+            'UPDATE orders_items SET order_id = :order_id, product_id = :product_id, quantity = :quantity, price = :price WHERE id = :id'
+        );
+
+        $parameters = [
+            'order_id' => $orderItem->getOrderId(),
+            'product_id' => $orderItem->getProductId(),
+            'quantity' => $orderItem->getQuantity(),
+            'price' => $orderItem->getPrice(),
+            'id' => $orderItem->getId(),
+        ];
+
+        return $query->execute($parameters);
+    }
+
+    /**
+     * Supprime un élément de commande.
+     *
+     * @param int $id L'identifiant de l'élément de commande à supprimer.
+     * @return bool Résultat de l'opération de suppression.
+     */
+    public function delete(int $id): bool
+    {
+        $query = $this->pdo->prepare('DELETE FROM orders_items WHERE id = :id');
+        return $query->execute(['id' => $id]);
     }
 }

@@ -1,113 +1,91 @@
 <?php
 
-class OrderStatusUpdateManager extends AbstractManager
+class OrderStatusUpdateManager
 {
-    // Méthode pour récupérer toutes les mises à jour de Orderstatus
-    public function findAll(): array
+    private PDO $pdo;
+
+    // Constructeur qui accepte un objet PDO pour la connexion à la base de données
+    public function __construct(PDO $pdo)
     {
-        $query = $this->pdo->prepare('SELECT * FROM orders_status_updates');
-        $query->execute();
-
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        $statusUpdates = [];
-
-        foreach ($result as $item) {
-            $statusUpdate = new OrderStatusUpdate(
-                (int) $item['order_id'],  // Conversion en entier
-                $item['status'],
-                $item['updated_at'],
-                (int) $item['id']         // Conversion en entier
-            );
-            $statusUpdates[] = $statusUpdate;
-        }
-
-        return $statusUpdates;
+        $this->pdo = $pdo;
     }
 
-    // Méthode pour récupérer une  mise à jour de Orderstatus
-    public function find(int $orderId): ?OrderStatusUpdate
+    /**
+     * Crée une nouvelle mise à jour de statut de commande.
+     *
+     * @param OrderStatusUpdate $orderStatusUpdate L'objet OrderStatusUpdate à insérer.
+     * @return int L'ID de la nouvelle mise à jour de statut insérée.
+     */
+    public function create(OrderStatusUpdate $orderStatusUpdate): int
     {
-        $query = $this->pdo->prepare('SELECT * FROM orders_status_updates WHERE order_id = :orderId');
-        $query->bindValue(':orderId', $orderId, PDO::PARAM_INT);
-        $query->execute();
+        $query = $this->pdo->prepare(
+            'INSERT INTO orders_status_updates (order_id, status, updated_at) VALUES (:order_id, :status, :updated_at)'
+        );
 
+        $parameters = [
+            'order_id' => $orderStatusUpdate->getOrderId(),
+            'status' => $orderStatusUpdate->getStatus(),
+            'updated_at' => $orderStatusUpdate->getUpdatedAt()->format('Y-m-d H:i:s')
+        ];
+
+        $query->execute($parameters);
+        return $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Récupère une mise à jour de statut de commande par son ID.
+     *
+     * @param int $id L'ID de la mise à jour de statut.
+     * @return OrderStatusUpdate|null L'objet OrderStatusUpdate trouvé ou null s'il n'existe pas.
+     */
+    public function findOne(int $id): ?OrderStatusUpdate
+    {
+        $query = $this->pdo->prepare('SELECT * FROM orders_status_updates WHERE id = :id');
+        $query->execute(['id' => $id]);
         $result = $query->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
             return new OrderStatusUpdate(
-                $result['order_id'],       // Assure-toi que 'order_id' est bien un entier dans ta base de données
+                $result['order_id'],
                 $result['status'],
-                $result['updated_at'],
-                isset($result['id']) ? (int) $result['id'] : null  // Conversion explicite de l'ID en entier
+                new DateTime($result['updated_at']),
+                $result['id']
             );
         }
-
         return null;
     }
 
-    // Méthode pour créer une nouvelle mise à jour de statut pour une commande
-    public function createOrderStatus(int $orderId, string $status): bool
+    /**
+     * Met à jour une mise à jour de statut de commande.
+     *
+     * @param OrderStatusUpdate $orderStatusUpdate L'objet OrderStatusUpdate à mettre à jour.
+     * @return bool True si la mise à jour a réussi, false sinon.
+     */
+    public function update(OrderStatusUpdate $orderStatusUpdate): bool
     {
-        try {
-            // Requête SQL pour insérer une nouvelle mise à jour de statut
-            $query = 'INSERT INTO orders_status_updates (order_id, status, updated_at) VALUES (:orderId, :status, NOW())';
+        $query = $this->pdo->prepare(
+            'UPDATE orders_status_updates SET order_id = :order_id, status = :status, updated_at = :updated_at WHERE id = :id'
+        );
 
-            // Préparation de la requête
-            $stmt = $this->pdo->prepare($query);
+        $parameters = [
+            'id' => $orderStatusUpdate->getId(),
+            'order_id' => $orderStatusUpdate->getOrderId(),
+            'status' => $orderStatusUpdate->getStatus(),
+            'updated_at' => $orderStatusUpdate->getUpdatedAt()->format('Y-m-d H:i:s')
+        ];
 
-            // Liaison des paramètres
-            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
-            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
-
-            // Exécuter la requête et retourner true si l'insertion a réussi
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            // En cas d'erreur, retourner false
-            return false;
-        }
+        return $query->execute($parameters);
     }
 
-
-    // Méthode pour mettre à jour le statut d'une commande OrderStatus
-    public function updateOrderStatus(int $orderId, string $status): bool
+    /**
+     * Supprime une mise à jour de statut de commande par son ID.
+     *
+     * @param int $id L'ID de la mise à jour de statut à supprimer.
+     * @return bool True si la suppression a réussi, false sinon.
+     */
+    public function delete(int $id): bool
     {
-        try {
-            // Requête SQL pour mettre à jour le statut d'une commande par son order_id
-            $query = 'UPDATE orders_status_updates SET status = :status, updated_at = NOW() WHERE order_id = :orderId';
-
-            // Préparation de la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Liaison des paramètres
-            $stmt->bindValue(':orderId', $orderId, PDO::PARAM_INT);
-            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
-
-            // Exécuter la requête et retourner true si la mise à jour a réussi
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            // En cas d'erreur, retourner false
-            return false;
-        }
-    }
-
-    // Méthode pour supprimer la mise à jour d'une commande OrderStatus
-    public function deleteOrderStatus(int $orderId): bool
-    {
-        try {
-            // Requête SQL pour supprimer une mise à jour de statut par son ID
-            $query = 'DELETE FROM orders_status_updates WHERE order_id = :orderId';
-
-            // Préparation de la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Liaison du paramètre
-            $stmt->bindValue(':orderId', $orderId, \PDO::PARAM_INT);
-
-            // Exécuter la requête et retourner true si la suppression a réussi
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            // En cas d'erreur, retourner false
-            return false;
-        }
+        $query = $this->pdo->prepare('DELETE FROM orders_status_updates WHERE id = :id');
+        return $query->execute(['id' => $id]);
     }
 }

@@ -4,7 +4,7 @@ abstract class AbstractManager
 {
     protected PDO $pdo;
 
-    public function __construct()
+    public function __construct() 
     {
         // Connexion à la base de données via PDO
         $connexion = "mysql:host=" . $_ENV['DB_HOST'] .

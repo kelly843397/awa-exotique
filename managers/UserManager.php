@@ -2,351 +2,171 @@
 
 class UserManager extends AbstractManager
 {
-    // Méthode pour créer un nouvel utilisateur
-    public function createUser(array $user): bool
+    // Le constructeur accepte un objet PDO
+    public function __construct(PDO $pdo)
     {
-        // Validation des données utilisateur
-        if (!isset($user['firstName'], $user['email'], $user['password'])) {
-            throw new PDOException("Les données utilisateur sont incomplètes.");
-        }
-
-        // Assainissement des données utilisateur avec htmlspecialchars
-        $firstName = htmlspecialchars($user['firstName'], ENT_QUOTES, 'UTF-8');
-        $email = trim($user['email']);
-
-       
-        // Validation du prénom (seulement lettres et tirets)
-        if (!preg_match("/^[a-zA-Z'-]+$/", $firstName)) {
-            throw new PDOException("Prénom invalide.");
-        }
-
-        // Validation de l'email
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new PDOException("Email invalide.");
-        }
-
-        // Vérifier si l'email existe déjà dans la base de données
-        $checkEmailSql = "SELECT COUNT(*) FROM users WHERE email = :email";
-        $checkEmailStmt = $this->pdo->prepare($checkEmailSql);
-        $checkEmailStmt->bindValue(':email', $email);
-        $checkEmailStmt->execute();
-
-        if ($checkEmailStmt->fetchColumn() > 0) {
-            throw new PDOException("Cet email est déjà utilisé.");
-        }
-
-        // Validation et sécurisation du mot de passe
-        if (!$this->validatePassword($user['password'])) {
-            throw new PDOException("Le mot de passe n'est pas assez fort.");
-        }
-
-        // Hachage du mot de passe avec bcrypt
-        $hashedPassword = password_hash($user['password'], PASSWORD_BCRYPT);
-
-        // Préparation de la requête SQL pour insérer l'utilisateur dans la base de données
-        $sql = "INSERT INTO users (firstName, email, password) VALUES (:firstName, :email, :password)";
-        $statement = $this->pdo->prepare($sql);
-
-        // Liaison des paramètres
-        $statement->bindValue(':firstName', $firstName);
-        $statement->bindValue(':email', $email);
-        $statement->bindValue(':password', $hashedPassword);
-
-        // Exécution de la requête SQL et gestion des erreurs
-        try {
-            if ($statement->execute() === false) {
-                throw new PDOException("Échec de l'insertion de l'utilisateur dans la base de données.");
-            }
-            return true; // Succès de la création de l'utilisateur
-        } catch (PDOException $e) {
-            // Gestion des erreurs SQL et affichage d'un message d'erreur
-            error_log($e->getMessage()); // Enregistrement de l'erreur dans les logs
-            throw new PDOException("Une erreur s'est produite lors de la création de l'utilisateur.");
-        }
+        // Utilise le PDO fourni pour la connexion
+        $this->pdo = $pdo;
     }
 
-    // Méthode pour valider la robustesse d'un mot de passe
-    private function validatePassword(string $password): bool
+    /**
+     * Fetches a user based on its identifier.
+     *
+     * @param int $id The identifier of the user to fetch.
+     * @return User|null The found user object or null if it doesn't exist.
+     */
+    public function findOne(int $id): ?User
     {
-        // Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre, et un caractère spécial
-        if (strlen($password) < 8 ||
-            !preg_match('/[A-Z]/', $password) ||    // Vérifie la présence d'une majuscule
-            !preg_match('/[0-9]/', $password) ||    // Vérifie la présence d'un chiffre
-            !preg_match('/[\W]/', $password)) {     // Vérifie la présence d'un caractère spécial
-            return false;
-        }
+        $query = $this->pdo->prepare('SELECT * FROM users WHERE id=:id');
+        $parameters = [
+            "id" => $id
+        ];
+        $query->execute($parameters);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
 
-        return true;
-    }
-
-    public function updateUser(array $user): bool
-    {
-        // Vérification que l'utilisateur a bien un id pour l'identifier
-        if (!isset($user['id'], $user['firstName'], $user['email'])) {
-            throw new PDOException("Les données utilisateur sont incomplètes.");
-        }
-
-        // Assainissement des données utilisateur
-        $firstName = htmlspecialchars(trim($user['firstName']), ENT_QUOTES, 'UTF-8');
-        $email = trim($user['email']);
-
-        // Validation du prénom (seulement lettres et tirets)
-        if (!preg_match("/^[a-zA-Z'-]+$/", $firstName)) {
-            throw new PDOException("Prénom invalide.");
-        }
-
-        // Validation de l'email
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new PDOException("Email invalide.");
-        }
-
-        // Préparation de la requête SQL pour mettre à jour l'utilisateur
-        $sql = "UPDATE users 
-                SET firstName = :firstName, email = :email";
-
-        // Si un mot de passe est fourni, on l'ajoute dans la requête
-        if (isset($user['password']) && !empty($user['password'])) {
-            if (!$this->validatePassword($user['password'])) {
-                throw new PDOException("Le mot de passe n'est pas assez fort.");
-            }
-
-            // Hachage du mot de passe avec bcrypt
-            $hashedPassword = password_hash($user['password'], PASSWORD_BCRYPT);
-
-            // Ajout du mot de passe dans la requête
-            $sql .= ", password = :password";
-        }
-
-        // Ajout de la condition WHERE pour identifier l'utilisateur à mettre à jour
-        $sql .= " WHERE id = :id";
-
-        // Préparation de la requête SQL
-        $statement = $this->pdo->prepare($sql);
-
-        // Liaison des paramètres obligatoires
-        $statement->bindValue(':firstName', $firstName);
-        $statement->bindValue(':email', $email);
-        $statement->bindValue(':id', $user['id'], \PDO::PARAM_INT);
-
-        // Liaison du mot de passe si fourni
-        if (isset($user['password']) && !empty($user['password'])) {
-            $statement->bindValue(':password', $hashedPassword);
-        }
-
-        // Exécution de la requête SQL
-        try {
-            if ($statement->execute() === false) {
-                throw new PDOException("Échec de la mise à jour de l'utilisateur.");
-            }
-            return true; // Succès de la mise à jour
-        } catch (PDOException $e) {
-            // Gestion des erreurs SQL et affichage d'un message d'erreur
-            error_log($e->getMessage()); // Enregistrement de l'erreur dans les logs
-            throw new PDOException("Une erreur s'est produite lors de la mise à jour de l'utilisateur.");
-        }
-    }
-
-    public function deleteUser(int $id): bool
-    {
-        // Vérification que l'ID est bien un entier valide
-        if ($id <= 0) {
-            throw new PDOException("ID utilisateur invalide.");
-        }
-
-        // Préparation de la requête SQL pour supprimer l'utilisateur
-        $sql = "DELETE FROM users WHERE id = :id";
-        $statement = $this->pdo->prepare($sql);
-
-        // Liaison de l'ID de l'utilisateur
-        $statement->bindValue(':id', $id, \PDO::PARAM_INT);
-
-        // Exécution de la requête SQL et gestion des erreurs
-        try {
-            if ($statement->execute() === false) {
-                throw new PDOException("Échec de la suppression de l'utilisateur.");
-            }
-            return true; // Succès de la suppression
-        } catch (PDOException $e) {
-            // Gestion des erreurs SQL et affichage d'un message d'erreur
-            error_log($e->getMessage()); // Enregistrement de l'erreur dans les logs
-            throw new PDOException("Une erreur s'est produite lors de la suppression de l'utilisateur.");
-        }
-    }
-
-    public function findUserById($id): ?array
-    {
-        // Vérifie que l'ID est un entier
-        if (!is_numeric($id) || intval($id) != $id) {
-            throw new PDOException("L'ID doit être un entier valide.");
-        }
-
-        try {
-            // Préparation de la requête SQL
-            $statement = $this->pdo->prepare("SELECT * FROM users WHERE id = :id");
-            $statement->bindValue(':id', (int)$id, PDO::PARAM_INT);
-            $statement->execute();
-
-            // Récupération de l'utilisateur
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
-
-            // Si aucun utilisateur n'est trouvé, retourne un message d'erreur
-            if (!$user) {
-                throw new PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
-            }
-
+        if ($result) {
+            // Convertir la date en objet DateTime
+            $createdAt = new DateTime($result["created_at"]);
+            $user = new User(
+                $result["firstName"],
+                $result["lastName"],
+                $result["email"],
+                $result["phone"],
+                $result["password"],
+                $result["role"],
+                $createdAt,
+                $result["id"]
+            );
             return $user;
-        } catch (PDOException $e) {
-            // Gestion de l'exception
-            echo "Erreur : " . $e->getMessage();
-            return null;
         }
+        return null;
     }
 
+    /**
+     * Fetches all users.
+     *
+     * @return array List of users.
+     */
     public function findAll(): array
     {
-        try {
-            // Préparation de la requête SQL pour récupérer tous les utilisateurs
-            $sql = "SELECT id, firstName, email FROM users";
-            $statement = $this->pdo->prepare($sql);
+        $query = $this->pdo->prepare('SELECT * FROM users');
+        $query->execute();
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $users = [];
 
-            // Exécuter la requête
-            $statement->execute();
-
-            // Récupérer tous les résultats sous forme de tableau associatif
-            $users = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-            // Si aucun utilisateur n'est trouvé, retourner un tableau vide
-            return $users ? $users : [];
-
-        } catch (\PDOException $e) {
-            // Gestion des exceptions et enregistrement de l'erreur dans les logs
-            error_log($e->getMessage()); 
-            throw new \PDOException("Une erreur s'est produite lors de la récupération des utilisateurs.");
+        foreach ($result as $item) {
+            // Convertir la date en objet DateTime
+            $createdAt = new DateTime($item["created_at"]);
+            $user = new User(
+                $item["firstName"],
+                $item["lastName"],
+                $item["email"],
+                $item["phone"],
+                $item["password"],
+                $item["role"],
+                $createdAt,
+                $item["id"]
+            );
+            $users[] = $user;
         }
+
+        return $users;
     }
 
-    public function changePassword(int $id, string $newPassword): bool
+    /**
+     * Updates a user.
+     *
+     * @param User $user The user object to update.
+     * @return bool Result of the database update operation.
+     */
+    public function update(User $user): bool
     {
-        try {
-            // Vérification de l'existence de l'utilisateur avec l'ID donné
-            $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
-            $statement->bindValue(':id', $id, PDO::PARAM_INT);
-            $statement->execute();
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$user) {
-                throw new PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
-            }
+        $query = $this->pdo->prepare(
+            'UPDATE users SET firstName=:firstName, lastName=:lastName, email=:email, phone=:phone, role=:role, password=:password WHERE id=:id'
+        );
 
-            // Hachage du nouveau mot de passe
-            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
-
-            // Mise à jour du mot de passe dans la base de données
-            $updateStatement = $this->pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
-            $updateStatement->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
-            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
-
-            // Exécute la mise à jour et vérifie si la modification a été effectuée
-            if ($updateStatement->execute()) {
-                return true;
-            } else {
-                throw new PDOException("Impossible de mettre à jour le mot de passe.");
-            }
-        } catch (PDOException $e) {
-            // Gestion des exceptions
-            echo "Erreur : " . $e->getMessage();
-            return false;
-        }
+        $parameters = [
+            'id' => $user->getId(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'email' => $user->getEmail(),
+            'phone' => $user->getPhone(),
+            'role' => $user->getRole(),
+            'password' => $user->getPassword(),
+        ];
+        return $query->execute($parameters);
     }
 
-    public function activateUser(int $id): bool
+    /**
+     * Creates a user.
+     *
+     * @param User $user The user object to insert.
+     * @return int The ID of the newly inserted user.
+     */
+    public function create(User $user): int
     {
-        try {
-            // Vérification de l'existence de l'utilisateur avec l'ID donné
-            $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
-            $statement->bindValue(':id', $id, \PDO::PARAM_INT);
-            $statement->execute();
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$user) {
-                throw new PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
-            }
-
-            // Mise à jour du statut de l'utilisateur (activation)
-            $updateStatement = $this->pdo->prepare("UPDATE users SET status = :status WHERE id = :id");
-            $updateStatement->bindValue(':status', 1, PDO::PARAM_INT); // 1 = utilisateur actif
-            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
-
-            // Exécute la mise à jour et vérifie si la modification a été effectuée
-            if ($updateStatement->execute()) {
-                return true;
-            } else {
-                throw new PDOException("Impossible d'activer l'utilisateur.");
-            }
-        } catch (PDOException $e) {
-            // Gestion des exceptions
-            echo "Erreur : " . $e->getMessage();
-            return false;
-        }
+        $query = $this->pdo->prepare(
+            'INSERT INTO users (firstName, lastName, email, phone, role, password, created_at) VALUES (:firstName, :lastName, :email, :phone, :role, :password, :created_at)'
+        );
+        $parameters = [
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'email' => $user->getEmail(),
+            'phone' => $user->getPhone(),
+            'role' => $user->getRole(),
+            'password' => $user->getPassword(),
+            // Conversion de DateTime en chaîne de caractères formatée
+            'created_at' => $user->getCreatedAt()->format('Y-m-d H:i:s'),
+        ];
+        $query->execute($parameters);
+        return $this->pdo->lastInsertId();
     }
 
-    public function deactivateUser(int $id): bool
+    /**
+     * Deletes a user.
+     *
+     * @param int $id The ID of the user to delete.
+     * @return bool Result of the database deletion operation.
+     */
+    public function delete(int $id): bool
     {
-        try {
-            // Vérification de l'existence de l'utilisateur avec l'ID donné
-            $statement = $this->pdo->prepare("SELECT id FROM users WHERE id = :id");
-            $statement->bindValue(':id', $id, \PDO::PARAM_INT);
-            $statement->execute();
-            $user = $statement->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$user) {
-                throw new PDOException("Aucun utilisateur trouvé avec l'ID " . $id);
-            }
-
-            // Mise à jour du statut de l'utilisateur (désactivation)
-            $updateStatement = $this->pdo->prepare("UPDATE users SET status = :status WHERE id = :id");
-            $updateStatement->bindValue(':status', 0, PDO::PARAM_INT); // 0 = utilisateur inactif
-            $updateStatement->bindValue(':id', $id, PDO::PARAM_INT);
-
-            if ($updateStatement->execute()) {
-                return true;
-            } else {
-                throw new PDOException("Impossible de désactiver l'utilisateur.");
-            }
-        } catch (PDOException $e) {
-            // Gestion des exceptions
-            echo "Erreur : " . $e->getMessage();
-            return false;
-        }
+        $query = $this->pdo->prepare('DELETE FROM users WHERE id=:id');
+        $parameters = [
+            "id" => $id
+        ];
+        return $query->execute($parameters);
     }
 
-    public function getUserById(int $id): ?array
+    /**
+     * Finds a user by email.
+     *
+     * @param string $email The email of the user to find.
+     * @return User|null The found user object or null if it doesn't exist.
+     */
+    public function findByEmail(string $email): ?User
     {
-        try {
-            // Préparation de la requête SQL pour récupérer l'utilisateur par son ID
-            $sql = "SELECT id, firstName, email FROM users WHERE id = :id";
-            $statement = $this->pdo->prepare($sql);
+        $query = $this->pdo->prepare('SELECT * FROM users WHERE email=:email');
+        $parameters = [
+            "email" => $email
+        ];
+        $query->execute($parameters);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
 
-            // Liaison du paramètre :id avec l'ID de l'utilisateur
-            $statement->bindValue(':id', $id, \PDO::PARAM_INT);
-
-            // Exécution de la requête
-            $statement->execute();
-
-            // Récupération de l'utilisateur
-            $user = $statement->fetch(\PDO::FETCH_ASSOC);
-
-            // Si aucun utilisateur n'est trouvé, retourner null
-            if (!$user) {
-                return null;
-            }
-
-            return $user; // Retourne les données de l'utilisateur
-        } catch (\PDOException $e) {
-            // Gestion de l'exception (ex : log l'erreur)
-            error_log($e->getMessage());
-            return null; // Retourne null en cas d'erreur
+        if ($result) {
+            // Convertir la date en objet DateTime
+            $createdAt = new DateTime($result["created_at"]);
+            $user = new User(
+                $result["firstName"],
+                $result["lastName"],
+                $result["email"],
+                $result["phone"],
+                $result["password"],
+                $result["role"],
+                $createdAt,
+                $result["id"]
+            );
+            return $user;
         }
+        return null;
     }
-
 }

@@ -2,174 +2,122 @@
 
 class ProductManager extends AbstractManager
 {
-    // Méthode pour récupérer tous les produits
-    public function findAllProducts(): array
+    // Le constructeur accepte un objet PDO
+    public function __construct(PDO $pdo)
     {
-        try {
-            // Requête SQL pour sélectionner tous les produits dans la base de données
-            $query = "SELECT * FROM products";
-            
-            // Préparer la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Exécuter la requête
-            $stmt->execute();
-
-            // Retourne tous les résultats sous forme de tableau associatif
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la récupération des produits : " . $e->getMessage());
-        }
+        // Utilise le PDO fourni pour la connexion
+        $this->pdo = $pdo;
     }
 
-    // Méthode pour récupérer un produit par son ID
-    public function findProductById(int $id): ?array
+    /**
+     * Fetches a product based on its identifier.
+     *
+     * @param int $id The identifier of the product to fetch.
+     * @return Product|null The found product object or null if it doesn't exist.
+     */
+    public function findOne(int $id): ?Product
     {
-        try {
-            // Requête SQL pour sélectionner un produit par son ID
-            $query = "SELECT * FROM products WHERE id = :id";
+        $query = $this->pdo->prepare('SELECT * FROM products WHERE id=:id');
+        $parameters = [
+            "id" => $id
+        ];
+        $query->execute($parameters);
+        $result = $query->fetch(PDO::FETCH_ASSOC);
 
-            // Préparer la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Lier l'ID au paramètre de la requête
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-
-            // Exécuter la requête
-            $stmt->execute();
-
-            // Récupérer le produit
-            $product = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            // Retourner le produit ou null si non trouvé
-            return $product ?: null;
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la récupération du produit : " . $e->getMessage());
+        if ($result) {
+            $product = new Product(
+                $result["name"],
+                $result["picture"],
+                $result["price"],
+                $result["category_id"],
+                $result["id"]
+            );
+            return $product;
         }
+        return null;
     }
 
-    // Méthode pour ajouter un produit dans la base de données
-    public function createProduct(string $name, float $price, int $categoryId, string $picture): bool
+    /**
+     * Fetches all products.
+     *
+     * @return array List of products.
+     */
+    public function findAll(): array
     {
-        try {
-            // Requête SQL pour insérer un nouveau produit
-            $query = "INSERT INTO products (name, price, category_id, picture) 
-                      VALUES (:name, :price, :category_id, :picture)";
+        $query = $this->pdo->prepare('SELECT * FROM products');
+        $query->execute();
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+        $products = [];
 
-            // Préparer la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Lier les valeurs aux paramètres
-            $stmt->bindValue(':name', $name, PDO::PARAM_STR);
-            $stmt->bindValue(':price', $price, PDO::PARAM_STR); // Utilise PDO::PARAM_STR pour les valeurs float
-            $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
-            $stmt->bindValue(':picture', $picture, PDO::PARAM_STR);
-
-            // Exécuter la requête
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la création du produit : " . $e->getMessage());
+        foreach ($result as $item) {
+            $product = new Product(
+                $item["name"],
+                $item["picture"],
+                $item["price"],
+                $item["category_id"],
+                $item["id"]
+            );
+            $products[] = $product;
         }
+
+        return $products;
     }
 
-    // Méthode pour mettre à jour un produit existant
-    public function updateProduct(int $id, string $name, float $price, int $categoryId, string $picture): bool
+    /**
+     * Creates a product.
+     *
+     * @param Product $product The product object to insert.
+     * @return int The ID of the newly inserted product.
+     */
+    public function create(Product $product): int
     {
-        try {
-            // Requête SQL pour mettre à jour les informations du produit
-            $query = "UPDATE products 
-                      SET name = :name, price = :price, category_id = :category_id, picture = :picture
-                      WHERE id = :id";
-
-            // Préparer la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Lier les valeurs aux paramètres
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->bindValue(':name', $name, PDO::PARAM_STR);
-            $stmt->bindValue(':price', $price, PDO::PARAM_STR);
-            $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
-            $stmt->bindValue(':picture', $picture, PDO::PARAM_STR);
-
-            // Exécuter la requête
-            return $stmt->execute();
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la mise à jour du produit : " . $e->getMessage());
-        }
+        $query = $this->pdo->prepare(
+            'INSERT INTO products (name, picture, price, category_id) VALUES (:name, :picture, :price, :category_id)'
+        );
+        $parameters = [
+            'name' => $product->getName(),
+            'picture' => $product->getPicture(),
+            'price' => $product->getPrice(),
+            'category_id' => $product->getCategoryId()
+        ];
+        $query->execute($parameters);
+        return $this->pdo->lastInsertId();
     }
 
-    // Méthode pour supprimer un produit de la base de données
-    public function deleteProduct(int $id): bool
+    /**
+     * Updates a product.
+     *
+     * @param Product $product The product object to update.
+     * @return bool Result of the database update operation.
+     */
+    public function update(Product $product): bool
     {
-        try {
-            // Supprimer d'abord toutes les lignes liées à ce produit dans orders_items
-            $queryOrdersItems = "DELETE FROM orders_items WHERE product_id = :id";
-            $stmtOrdersItems = $this->pdo->prepare($queryOrdersItems);
-            $stmtOrdersItems->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmtOrdersItems->execute();
+        $query = $this->pdo->prepare(
+            'UPDATE products SET name=:name, picture=:picture, price=:price, category_id=:category_id WHERE id=:id'
+        );
 
-            // Ensuite, supprimer le produit lui-même
-            $queryProduct = "DELETE FROM products WHERE id = :id";
-            $stmtProduct = $this->pdo->prepare($queryProduct);
-            $stmtProduct->bindValue(':id', $id, PDO::PARAM_INT);
-
-            // Exécuter la requête pour supprimer le produit
-            return $stmtProduct->execute();
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la suppression du produit : " . $e->getMessage());
-        }
+        $parameters = [
+            'id' => $product->getId(),
+            'name' => $product->getName(),
+            'picture' => $product->getPicture(),
+            'price' => $product->getPrice(),
+            'category_id' => $product->getCategoryId()
+        ];
+        return $query->execute($parameters);
     }
 
-    // Méthode pour récupérer tous les produits d'une catégorie spécifique
-    public function getProductsByCategory(int $categoryId): array
+    /**
+     * Deletes a product.
+     *
+     * @param int $id The ID of the product to delete.
+     * @return bool Result of the database deletion operation.
+     */
+    public function delete(int $id): bool
     {
-        try {
-            // Requête SQL pour sélectionner les produits appartenant à une catégorie
-            $query = "SELECT * FROM products WHERE category_id = :category_id";
-
-            // Préparer la requête
-            $stmt = $this->pdo->prepare($query);
-
-            // Lier l'ID de la catégorie
-            $stmt->bindValue(':category_id', $categoryId, PDO::PARAM_INT);
-
-            // Exécuter la requête
-            $stmt->execute();
-
-            // Retourner tous les résultats sous forme de tableau associatif
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la récupération des produits par catégorie : " . $e->getMessage());
-        }
-    }
-
-    // Méthode pour rechercher des produits par mot-clé
-    public function searchProducts(string $query): array
-    {
-        try {
-            // Requête SQL pour rechercher des produits dont le nom correspond au mot-clé
-            $sql = "SELECT * FROM products WHERE name LIKE :query";
-
-            // Préparer la requête
-            $stmt = $this->pdo->prepare($sql);
-
-            // Lier le mot-clé avec des wildcards pour la recherche
-            $stmt->bindValue(':query', '%' . $query . '%', PDO::PARAM_STR);
-
-            // Exécuter la requête
-            $stmt->execute();
-
-            // Retourner tous les résultats sous forme de tableau associatif
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            // Gestion des erreurs
-            throw new \Exception("Erreur lors de la recherche de produits : " . $e->getMessage());
-        }
+        $query = $this->pdo->prepare('DELETE FROM products WHERE id=:id');
+        $parameters = [
+            "id" => $id
+        ];
+        return $query->execute($parameters);
     }
 }
