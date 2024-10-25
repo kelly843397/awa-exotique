@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supprimer la commande n°{{ id }}{% endblock %}
+
+{% block content %}
+    <h1>Supprimer la commande n°{{ id }}</h1>
+
+    <form method="POST" action="/awa-exotique/orders/delete/{{ id }}">
+        <!-- CSRF Token pour sécuriser le formulaire -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <p>Êtes-vous sûr de vouloir supprimer cette commande ?</p>
+
+        <button type="submit">Supprimer</button>
+        <a href="/awa-exotique/orders">Annuler</a>
+    </form>
+{% endblock %}

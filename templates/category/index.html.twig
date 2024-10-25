@@ -9,15 +9,15 @@
 
     <a href="/awa-exotique/create">Ajouter une nouvelle catégorie</a>
 
-    <ul>
-        {% for category in categories %}
-            <li>
-                {{ category.name }}
-                <a href="/awa-exotique/edit?id={{ category.id }}">Modifier</a> |
-                <a href="/awa-exotique/delete?id={{ category.id }}">Supprimer</a>
-            </li>
-        {% else %}
-            <li>Aucune catégorie trouvée.</li>
-        {% endfor %}
+    <ul id="categories-list">
+        <!-- Les catégories seront chargées ici via JavaScript -->
     </ul>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        // Variable pour savoir si l'utilisateur est administrateur
+        var isAdmin = {{ is_admin ? 'true' : 'false' }};
+    </script>
+    <script src="/path/to/your/js/categories.js" defer></script>
 {% endblock %}

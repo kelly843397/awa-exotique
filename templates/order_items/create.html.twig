@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un nouvel article à la commande{% endblock %}
+
+{% block content %}
+    <h1>Ajouter un nouvel article à la commande #{{ orderId }}</h1>
+
+    <form method="POST" action="/awa-exotique/orders/{{ orderId }}/items/create">
+        <label for="product_id">ID du produit :</label>
+        <input type="number" name="product_id" id="product_id" required><br><br>
+
+        <label for="quantity">Quantité :</label>
+        <input type="number" name="quantity" id="quantity" required><br><br>
+
+        <label for="price">Prix :</label>
+        <input type="text" name="price" id="price" required><br><br>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <button type="submit">Ajouter</button>
+    </form>
+{% endblock %}

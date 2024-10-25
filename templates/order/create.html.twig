@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une nouvelle commande{% endblock %}
+
+{% block content %}
+    <h1>Créer une nouvelle commande</h1>
+
+    <form method="POST" action="/awa-exotique/orders/create">
+        <!-- CSRF Token pour sécuriser le formulaire -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <button type="submit">Créer la commande</button>
+    </form>
+
+    <!-- Lien pour revenir à la liste des commandes -->
+    <a href="/awa-exotique/orders">Retour à la liste des commandes</a>
+{% endblock %}

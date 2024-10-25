@@ -1,0 +1,30 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Connexion</h1>
+
+    {% if csrf_token is defined %}
+        <form action="/check-login" method="post">
+            <input type="hidden" name="csrf-token" value="{{ csrf_token }}">
+                
+            <fieldset>
+                <label for="email">Email :</label>
+                <input type="email" name="email" id="email" required>
+            </fieldset>
+
+            <fieldset>
+                <label for="password">Mot de passe :</label>
+                <input type="password" name="password" id="password" required>
+            </fieldset>
+        
+            <button type="submit">Se connecter</button>
+        </form>
+    {% else %}
+        <p>Token CSRF manquant. Veuillez recharger la page.</p>
+    {% endif %}
+    <p>Pas encore inscrit ? <a href="/register">Créez un compte</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la commande n°{{ order.id }}{% endblock %}
+
+{% block content %}
+    <h1>Détails de la commande n°{{ order.id }}</h1>
+
+    <p><strong>ID Utilisateur :</strong> {{ order.user_id }}</p>
+    <p><strong>Date de commande :</strong> {{ order.order_date }}</p>
+    <p><strong>Statut :</strong> {{ order.status }}</p>
+
+    <!-- Lien pour revenir à la liste des commandes -->
+    <a href="/awa-exotique/orders">Retour à la liste des commandes</a>
+{% endblock %}

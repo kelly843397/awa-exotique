@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un article de la commande{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'article #{{ orderItem.id }}</h1>
+
+    <form method="POST" action="/awa-exotique/orders/items/edit/{{ orderItem.id }}">
+        <label for="quantity">Quantité :</label>
+        <input type="number" name="quantity" id="quantity" value="{{ orderItem.quantity }}" required><br><br>
+
+        <label for="price">Prix :</label>
+        <input type="text" name="price" id="price" value="{{ orderItem.price }}" required><br><br>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <button type="submit">Mettre à jour</button>
+    </form>
+{% endblock %}

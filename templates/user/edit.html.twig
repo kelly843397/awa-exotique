@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Modifier un Utilisateur
+{% endblock %}
+
+{% block content %}
+    <h1>Modifier l'Utilisateur</h1>
+
+    <form method="POST" action="/awa-exotique/users/edit?id={{ user.id }}">
+        <label for="firstName">Prénom :</label>
+        <input type="text" name="firstName" id="firstName" value="{{ user.firstName }}" required>
+
+        <label for="email">Email :</label>
+        <input type="email" name="email" id="email" value="{{ user.email }}" required>
+
+        <label for="password">Nouveau Mot de Passe (optionnel) :</label>
+        <input type="password" name="password" id="password">
+
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <button type="submit">Modifier</button>
+    </form>
+{% endblock %}

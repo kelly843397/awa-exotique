@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Détails de l'Utilisateur
+{% endblock %}
+
+{% block content %}
+    <h1>Détails de l'Utilisateur</h1>
+
+    <p><strong>Prénom :</strong> {{ user.firstName }}</p>
+    <p><strong>Email :</strong> {{ user.email }}</p>
+
+    <a href="/awa-exotique/users/edit?id={{ user.id }}">Modifier cet utilisateur</a> |
+    <a href="/awa-exotique/users/delete?id={{ user.id }}">Supprimer cet utilisateur</a>
+{% endblock %}

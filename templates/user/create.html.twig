@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Ajouter un Utilisateur
+{% endblock %}
+
+{% block content %}
+    <h1>Ajouter un Utilisateur</h1>
+
+    <form method="POST" action="/awa-exotique/users/create">
+        <label for="firstName">Prénom :</label>
+        <input type="text" name="firstName" id="firstName" required>
+
+        <label for="email">Email :</label>
+        <input type="email" name="email" id="email" required>
+
+        <label for="password">Mot de passe :</label>
+        <input type="password" name="password" id="password" required>
+
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <button type="submit">Créer</button>
+    </form>
+{% endblock %}

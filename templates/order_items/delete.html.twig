@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Supprimer un article de la commande{% endblock %}
+
+{% block content %}
+    <h1>Supprimer l'article #{{ orderItem.id }} de la commande</h1>
+
+    <p>Êtes-vous sûr de vouloir supprimer l'article "{{ orderItem.name }}" de la commande ?</p>
+
+    <form method="POST" action="/awa-exotique/orders/items/delete/{{ orderItem.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <button type="submit">Supprimer</button>
+    </form>
+
+    <a href="/awa-exotique/orders/{{ orderItem.order_id }}/items">Annuler</a>
+{% endblock %}

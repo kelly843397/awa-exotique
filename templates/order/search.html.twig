@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche de commande{% endblock %}
+
+{% block content %}
+    <h1>Résultat de la recherche pour "{{ query }}"</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>ID Utilisateur</th>
+                <th>Date de commande</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.user_id }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>
+                        <a href="/awa-exotique/orders/{{ order.id }}">Voir</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucune commande trouvée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/awa-exotique/orders">Retour à la liste des commandes</a>
+{% endblock %}

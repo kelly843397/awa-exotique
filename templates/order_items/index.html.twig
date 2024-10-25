@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des articles de la commande{% endblock %}
+
+{% block content %}
+    <h1>Articles de la commande #{{ orderId }}</h1>
+
+    <a href="/awa-exotique/orders/{{ orderId }}/items/create">Ajouter un nouvel article</a>
+
+    <ul>
+        {% for orderItem in orderItems %}
+            <li>
+                Produit : {{ orderItem.name }} - Quantité : {{ orderItem.quantity }} - Prix : {{ orderItem.price }} €
+                <a href="/awa-exotique/orders/items/edit/{{ orderItem.id }}">Modifier</a> |
+                <a href="/awa-exotique/orders/items/delete/{{ orderItem.id }}">Supprimer</a>
+            </li>
+        {% else %}
+            <li>Aucun article trouvé dans cette commande.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

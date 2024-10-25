@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des commandes{% endblock %}
+
+{% block content %}
+    <h1>Liste des commandes</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>ID Utilisateur</th>
+                <th>Date de commande</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.user_id }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>
+                        <!-- Lien pour afficher les détails de la commande -->
+                        <a href="/awa-exotique/orders/{{ order.id }}">Voir</a> |
+                        
+                        <!-- Lien pour modifier la commande (réservé à l'administrateur) -->
+                        <a href="/awa-exotique/orders/edit/{{ order.id }}">Modifier</a> |
+                        
+                        <!-- Lien pour supprimer la commande (réservé à l'administrateur) -->
+                        <a href="/awa-exotique/orders/delete/{{ order.id }}">Supprimer</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucune commande trouvée.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

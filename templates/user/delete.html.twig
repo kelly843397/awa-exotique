@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Supprimer un Utilisateur
+{% endblock %}
+
+{% block content %}
+    <h1>Supprimer l'Utilisateur</h1>
+
+    <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
+
+    <form method="POST" action="/awa-exotique/users/delete?id={{ id }}">
+        <!-- Inclure le token CSRF -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        
+        <button type="submit">Oui, supprimer</button>
+        <a href="/awa-exotique/users">Annuler</a>
+    </form>
+{% endblock %}

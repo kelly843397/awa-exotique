@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la commande n°{{ order.id }}{% endblock %}
+
+{% block content %}
+    <h1>Modifier la commande n°{{ order.id }}</h1>
+
+    <form method="POST" action="/awa-exotique/orders/edit/{{ order.id }}">
+        <!-- CSRF Token pour sécuriser le formulaire -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+        <label for="status">Statut :</label>
+        <input type="text" id="status" name="status" value="{{ order.status }}" required>
+
+        <button type="submit">Mettre à jour la commande</button>
+    </form>
+
+    <!-- Lien pour revenir à la liste des commandes -->
+    <a href="/awa-exotique/orders">Retour à la liste des commandes</a>
+{% endblock %}
