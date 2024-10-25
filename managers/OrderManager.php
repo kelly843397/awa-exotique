@@ -2,13 +2,6 @@
 
 class OrderManager extends AbstractManager
 {
-    // Le constructeur accepte un objet PDO
-    public function __construct(PDO $pdo)
-    {
-        // Utilise le PDO fourni pour la connexion
-        $this->pdo = $pdo;
-    }
-
     /**
      * Crée une nouvelle commande dans la base de données.
      *

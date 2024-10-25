@@ -2,13 +2,6 @@
 
 class CategoryManager extends AbstractManager
 {
-    // Le constructeur accepte un objet PDO
-    public function __construct(PDO $pdo)
-    {
-        // Utilise le PDO fourni pour la connexion
-        $this->pdo = $pdo;
-    }
-
     /**
      * Fetches a category based on its identifier.
      *

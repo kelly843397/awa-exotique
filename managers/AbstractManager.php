@@ -4,9 +4,9 @@ abstract class AbstractManager
 {
     protected PDO $pdo;
 
-    public function __construct() 
+    public function __construct()
     {
-        // Connexion à la base de données via PDO
+        // Connexion à la base de donnée via PDO
         $connexion = "mysql:host=" . $_ENV['DB_HOST'] .
                      ";port=" . $_ENV['DB_PORT'] .
                      ";dbname=" . $_ENV['DB_NAME'] .
@@ -19,7 +19,7 @@ abstract class AbstractManager
         );
 
         if (!$this->pdo) {
-            die("Erreur lors de la connexion à la base de données.");
+            die("Erreur lors de la connexion à la base de donnée.");
         }
     }
 }

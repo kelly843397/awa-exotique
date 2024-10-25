@@ -1,14 +1,7 @@
 <?php
 
-class OrderStatusUpdateManager
+class OrderStatusUpdateManager extends AbstractManager
 {
-    private PDO $pdo;
-
-    // Constructeur qui accepte un objet PDO pour la connexion à la base de données
-    public function __construct(PDO $pdo)
-    {
-        $this->pdo = $pdo;
-    }
 
     /**
      * Crée une nouvelle mise à jour de statut de commande.
