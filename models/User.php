@@ -66,6 +66,10 @@ class User
     }
 
     // Setters
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
     public function setFirstName(string $firstName): void
     {
         $this->firstName = $firstName;
