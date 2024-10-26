@@ -1,83 +1,53 @@
 <?php
+/**
+ * @author : Gaellan
+ * @link : https://github.com/Gaellan
+ */
 
+ require_once __DIR__ . '/../vendor/autoload.php'; // Inclure l'autoload de Composer
 abstract class AbstractController
 {
-    protected $twig;
-
+    private \Twig\Environment $twig;
     public function __construct()
     {
-        // Charger les templates depuis le dossier "templates"
         $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../templates');
-
-        // Instancier Twig avec le loader et activer le mode debug
-        $this->twig = new \Twig\Environment($loader, [
-            'debug' => true,  // Active le mode debug
-            'cache' => false, // Désactive le cache pour le développement
+        $twig = new \Twig\Environment($loader,[
+            'debug' => true,
         ]);
 
-        // Ajouter l'extension Debug à Twig
-        $this->twig->addExtension(new \Twig\Extension\DebugExtension());
+        $twig->addExtension(new \Twig\Extension\DebugExtension());
 
-        // Vérifier que la session est démarrée
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $this->twig = $twig;
     }
 
-    // Méthode pour afficher un template Twig avec des données
-    protected function render(string $template, array $data = []): void
+    protected function render(string $template, array $data) : void
     {
-        echo $this->twig->render($template, $data);
+        echo $this->twig->render($template, $data);  
     }
 
-    // Méthode pour rediriger vers une autre route
-    protected function redirect(string $route): void
+    /**
+     * Redirige vers une autre URL.
+     *
+     * @param string $url L'URL vers laquelle rediriger.
+     */
+    protected function redirect(string $url): void
     {
-        header('Location: ' . $route);
-        exit();
+        header("Location: " . $url);
+        exit;
     }
 
-    // Méthode pour récupérer un paramètre depuis l'URL (GET)
-    protected function getParam(string $name): mixed
+    /**
+     * Affiche une notification avec un type donné.
+     *
+     * @param string $message Le message de la notification.
+     * @param string $type Le type de notification (success, error, info, etc.).
+     */
+    protected function notify(string $message, string $type): void
     {
-        return $_GET[$name] ?? null;
-    }
-
-    // Méthodes de vérification d'authentification et rôle
-
-    // Vérifie si l'utilisateur est authentifié
-    protected function isAuthenticated(): bool
-    {
-        return isset($_SESSION['user']);
-    }
-
-    // Vérifie si l'utilisateur est administrateur
-    protected function isAdmin(): bool
-    {
-        return $this->isAuthenticated() && $_SESSION['user']['role'] === 'admin';
-    }
-
-    // Redirige l'utilisateur vers la page de connexion s'il n'est pas authentifié
-    protected function redirectIfNotAuthenticated(): void
-    {
-        if (!$this->isAuthenticated()) {
-            $this->redirect('/login');
-            exit();
-        }
-    }
-
-    // Redirige l'utilisateur vers une page d'erreur s'il n'est pas administrateur
-    protected function redirectIfNotAdmin(): void
-    {
-        if (!$this->isAdmin()) {
-            $this->redirect('/awa-exotique/403');
-            exit();
-        }
-    }
-
-    // Méthode pour ajouter des variables globales à Twig, comme l'utilisateur authentifié
-    protected function addGlobalTwigVariables(): void
-    {
-        $this->twig->addGlobal('user', $_SESSION['user'] ?? null);
+        $_SESSION["notifications"][] = [
+            "message" => $message,
+            "type" => $type,
+        ];
     }
 }
+ 

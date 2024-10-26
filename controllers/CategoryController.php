@@ -9,6 +9,14 @@ class CategoryController extends AbstractController
         $categoryManager = new CategoryManager();
         $categories = $categoryManager->findAll();
 
+        // Vérifier si la requête est une requête AJAX (fetch)
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            // Retourner les catégories au format JSON pour les appels AJAX
+            header('Content-Type: application/json');
+            echo json_encode($categories);
+            exit;
+        }
+
 
         // Affichage de la liste des catégories
         $this->render('category/index.html.twig', ['categories' => $categories]);

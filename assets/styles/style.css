@@ -1,5 +1,3 @@
-@import 'normalize.css';
-
 /* Style général */
 * {
     margin: 0;
@@ -9,8 +7,8 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #fff;
-    color: #333;
+    background-image: url("assets/images/store.jpg");
+    background-position: center;
 }
 
 .container {
@@ -19,7 +17,16 @@ body {
     padding: 0 15px;
 }
 
-/* Barre de navigation */
+.navbar ul {
+    list-style-type: none; /* Supprime les puces des éléments de liste */
+    padding: 0; /* Enlève l'espace par défaut */
+    margin: 0; /* Enlève l'espace par défaut */
+    display: flex; /* Utilise flexbox pour aligner les éléments en ligne */
+    justify-content: space-around; /* Répartit l'espace entre les éléments */
+    border: 1px solid red;
+}
+
+Barre de navigation 
 .navbar {
     background-color: #F1C40F;
     padding: 15px;
@@ -48,7 +55,8 @@ body {
 }
 
 /* Image principale */
-.main-image {
+.custom {
+    background-image: url();
     width: 100%;
     height: auto;
     max-height: 500px;
@@ -57,24 +65,3 @@ body {
 }
 
 /* footer-content */
-.footer-content {
-    background-color: #F1C40F;
-    padding: 15px;
-    text-align: center;
-    color: black;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.footer-content p {
-    margin: 5px 0;
-}
-
-.footer-content a {
-    color: black;
-    text-decoration: none;
-}
-
-.footer-content a:hover {
-    color: #2980B9;
-}
