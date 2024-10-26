@@ -15,15 +15,26 @@
                 <!-- Navigation principale par-dessus l'image -->
                 <nav class="navbar">
                     <ul>
-                        <li><a href="/">Accueil</a></li>
+                        <li><a href="?route=home">Accueil</a></li>
                         <li><a href="/products"><i class="fa-solid fa-bars"></i></a></li>
-                        <li><a href="/account"><i class="fas fa-user-circle"></i></a></li>
+                        <!-- Lien utilisateur avec connexion/déconnexion -->
+                        <li>
+                            <a href="<?php echo isset($_SESSION['user']) ? 'javascript:void(0)' : 'index.php?route=login'; ?>" title="Utilisateur">
+                                <i class="fas fa-user-circle"></i>
+                            </a>
+                            <?php if (isset($_SESSION['user'])): ?>
+                                <!-- Menu déroulant si l'utilisateur est connecté -->
+                                <div id="user-menu" class="dropdown">
+                                    <a href="index.php?route=profile">Profil</a>
+                                    <a href="index.php?route=logout">Déconnexion</a>
+                                </div>
+                            <?php endif; ?>
+                        </li>
                         <li><a href="/cart"><i class="fas fa-shopping-cart"></i></a></li>
-                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="?route=contact">Contact</a></li>
                     </ul>
                 </nav>
             </div>
-        </div>
     </header>
 
     <main>
@@ -32,7 +43,7 @@
                 {{ app.session.get('flash_message') }}
             </div>
         {% endif %}
-        
+
         {% block content %}
         {% endblock %}
     </main>
