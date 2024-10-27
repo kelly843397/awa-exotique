@@ -13,6 +13,7 @@ abstract class AbstractController
         $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../templates');
         $twig = new \Twig\Environment($loader,[
             'debug' => true,
+            'cache' => false, // Désactivation du cache pendant le développement
         ]);
 
         $twig->addExtension(new \Twig\Extension\DebugExtension());
@@ -33,7 +34,7 @@ abstract class AbstractController
     protected function redirect(string $url): void
     {
         header("Location: " . $url);
-        exit;
+        //exit;
     }
 
     /**
