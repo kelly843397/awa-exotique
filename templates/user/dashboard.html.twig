@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord Utilisateur{% endblock %}
+
+{% block content %}
+    <h1>Bienvenue sur le Tableau de Bord, {{ user.getFirstName() }} {{ user.getLastName() }}</h1>
+    <p>Email: {{ user.getEmail() }}</p>
+    <p>Rôle: {{ user.getRole() }}</p>
+{% endblock %}

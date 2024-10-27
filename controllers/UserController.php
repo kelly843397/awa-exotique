@@ -9,7 +9,6 @@ class UserController extends AbstractController
     {
         $csrfTokenManager = new CSRFTokenManager();
         $csrfToken = $csrfTokenManager->generateCSRFToken();
-        var_dump($csrfToken); // Debug: Afficher le jeton CSRF
         $this->render('account/login.html.twig', [
             'csrf_token' => $csrfToken,
         ]);
@@ -48,14 +47,29 @@ class UserController extends AbstractController
         if ($user && password_verify($_POST["password"], $user->getPassword())) {
             $_SESSION["user"] = $user;
             $this->notify("Bienvenue " . htmlspecialchars($user->getFirstName()) . " !", "success");
-            
+
+            // Redirection vers le tableau de bord en fonction du rôle
+        $this->redirectToDashboard($user->getRole(), $user);
+        exit;  
         } else {
             $this->notify("Identifiants incorrects. Veuillez réessayer.", "error");
-            // $this->redirect("index.php?route=login");// erreur
+            $this->redirect("index.php?route=login");// erreur
             exit;
         }
     }
 
+    private function redirectToDashboard(string $role, $user): void
+    {
+        if ($role === 'admin') {
+            $this->render('admin/dashboard.html.twig', [
+                'user' => $user
+            ]);
+        } else {
+            $this->render('user/dashboard.html.twig', [
+                'user' => $user
+            ]); 
+        }
+    }
 
     /**
      * Affiche le formulaire d'inscription.
@@ -154,7 +168,12 @@ class UserController extends AbstractController
     public function logout(): void
     {
         session_destroy();
-        //$this->redirect("index.php?route=home");
+        $this->redirect("index.php?route=home");
         exit;
+    }
+
+    public function testRender(): void
+    {
+        $this->render('test.html.twig', []);
     }
 }

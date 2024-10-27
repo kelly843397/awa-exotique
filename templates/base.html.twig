@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Pour les icônes de la barre de navigation -->
 </head>
 <body>
+    <!--<img class="vitrine" src="assets/images/store.jpg" alt="vitrine du magasin">-->
     <header>
         <div class="header-container">
                 <!-- Navigation principale par-dessus l'image -->
@@ -19,16 +20,20 @@
                         <li><a href="/products"><i class="fa-solid fa-bars"></i></a></li>
                         <!-- Lien utilisateur avec connexion/déconnexion -->
                         <li>
-                            <a href="<?php echo isset($_SESSION['user']) ? 'javascript:void(0)' : 'index.php?route=login'; ?>" title="Utilisateur">
-                                <i class="fas fa-user-circle"></i>
-                            </a>
-                            <?php if (isset($_SESSION['user'])): ?>
+                            {% if user is defined %}
+                                <a href="javascript:void(0)" title="Utilisateur">
+                                    <i class="fas fa-user-circle"></i>
+                                </a>
                                 <!-- Menu déroulant si l'utilisateur est connecté -->
                                 <div id="user-menu" class="dropdown">
-                                    <a href="index.php?route=profile">Profil</a>
-                                    <a href="index.php?route=logout">Déconnexion</a>
+                                    <a href="?route=profile">Profil</a>
+                                    <a href="?route=logout">Déconnexion</a>
                                 </div>
-                            <?php endif; ?>
+                            {% else %}
+                                <a href="?route=login" title="Utilisateur">
+                                    <i class="fas fa-user-circle"></i>
+                                </a>
+                            {% endif %}
                         </li>
                         <li><a href="/cart"><i class="fas fa-shopping-cart"></i></a></li>
                         <li><a href="?route=contact">Contact</a></li>
